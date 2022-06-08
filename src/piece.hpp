@@ -34,19 +34,58 @@ public:
 public:
    Piece(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
 
+
+   // Just to make the compiler's warnings disappear
    Piece(const Piece& other);
    Piece operator=(const Piece& other) = delete;
    virtual ~Piece() {};
 
+   //********************************************
+   //**
+   //** Checks wether a position is occupied.
+   //** It returns a 'PieceColor' object.
+   //** A position is not occupied if the return value
+   //** if PieceColor::NONE.
+   //**
+   //********************************************
    PieceColor isPosOccupied(const string &pos);
+
+   //********************************************
+   //**
+   //** Checks wether a move is valid.
+   //** A move is valid if it's in the 'legalMoves'
+   //** vector.
+   //**
+   //********************************************
    bool isValidMove(const string &move);
+
+   //********************************************
+   //**
+   //** Given a position and the color of
+   //** the piece (that might be attacked),
+   //** it returns wether that position can be attacked.
+   //**
+   //********************************************
    bool canPosBeAttacked(const string &pos, const PieceColor &color);
-   // Will be overriden for pawn (and possibly king)
+
+   // Overridden for 'Pawn' and 'King'
    virtual void update();
-   // For kings
+
+   //** For kings
+   //********************************************
+   //**
+   //** Handles castling.
+   //**
+   //********************************************
    virtual void shortCastle();
    virtual void longCastle();
 protected:
+   //********************************************
+   //**
+   //** Puts the legal moves in the 'legalMoves'
+   //** vector.
+   //**
+   //********************************************
    virtual void setLegalMoves() = 0;
 
 };

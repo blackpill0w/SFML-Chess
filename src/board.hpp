@@ -15,19 +15,77 @@ using std::string;
 using std::vector;
 using std::find;
 
+//**
+//********************************************
+//**
+//** A class to handle the game's logic,
+//** the board is a vector of unique_ptr
+//** to the 'Piece' class (abstract class)
+//**
+//********************************************
+
 class Board {
 
 public:
+   //********************************************
+   //**
+   //** The representation of the board.
+   //**
+   //********************************************
    vector< unique_ptr<Piece> > pieces;
+
+   //********************************************
+   //**
+   //** Color of the pieces to play.
+   //**
+   //********************************************
    PieceColor turn;
 public:
    Board();
-   void changeTurn();
+   //********************************************
+   //**
+   //** Moving a piece and everything that comes with that
+   //** the piece to be moved is deduced from the 'from' var
+   //**
+   //********************************************
    bool move(std::string &from, std::string &to);
+
+   //********************************************
+   //**
+   //** Get index (in the vector of pieces) of a piece
+   //** from a position (and optionally the
+   //** opposite color of the piece).
+   //**
+   //********************************************
    unsigned getIndexOfPieceAt(const string &pos, const PieceColor &colorToBeDifferentFrom = NONE);
+
+   //********************************************
+   //**
+   //** Update the state of the board.
+   //**
+   //********************************************
    void update();
+
 protected:
+   //********************************************
+   //**
+   //** Simple. Change the turn.
+   //**
+   //********************************************
+   void changeTurn();
+
+   //********************************************
+   //**
+   //** Remove a piece from the board (taking a piece).
+   //**
+   //********************************************
    void removePiece(unsigned index);
+
+   //********************************************
+   //**
+   //** Handle castling.
+   //**
+   //********************************************
    void castle(unsigned movingPieceIndex, string from, string to);
 };
 

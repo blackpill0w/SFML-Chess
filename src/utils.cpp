@@ -2,7 +2,7 @@
 
 namespace utils {
 
-   extern const unsigned int g_max_uint{ std::numeric_limits< unsigned int >::max() };
+   extern const unsigned int invalidIndex{ std::numeric_limits< unsigned int >::max() };
    extern const unsigned int fps{ 60u };
 
    extern const int pieceSize{ 70 };
@@ -50,17 +50,19 @@ namespace utils {
    }
 
    unsigned getSpriteIndexAt(const vector< unique_ptr<PieceSprite> > &sprites, const sf::Vector2f &pos) {
-      unsigned index{ g_max_uint };
+      unsigned index{ invalidIndex };
       for (unsigned j=0 ; j < sprites.size(); j++ ) {
-         if (sprites[j]->sprite.getGlobalBounds().contains(pos)) {
-            index = j;
-            break;
+         if (sprites[j]->alive) {
+            if (sprites[j]->sprite.getGlobalBounds().contains(pos)) {
+               index = j;
+               break;
+            }
          }
       }
       return index;
    }
 
-   void highlightMoves(sf::RenderWindow *window, Board *board, unsigned pieceIndex) {
+   void highlightMoves(sf::RenderWindow *window, Board *board, unsigned &pieceIndex) {
       for (auto& pos: board->pieces[pieceIndex]->legalMoves) {
          unique_ptr< sf::RectangleShape > p{ make_unique< sf::RectangleShape >(sf::RectangleShape({70, 70})) };
          p->setPosition(strToVectorf(pos));
@@ -76,19 +78,6 @@ namespace utils {
          }
       }
       return false;
-   }
-
-   void checkDeadSprites(vector< unique_ptr<PieceSprite> > *sprites) {
-      unsigned spritetoBeDeletedIndex{ g_max_uint };
-      for (unsigned i=0; i < sprites->size(); i++) {
-         if (! ( (*sprites)[i]->alive )) {
-            spritetoBeDeletedIndex = i;
-            break;
-         }
-      }
-      if (spritetoBeDeletedIndex != g_max_uint) {
-         sprites->erase(sprites->begin() + spritetoBeDeletedIndex);
-      }
    }
 
    void loadTextures(vector< sf::Texture > &textureList) {
@@ -110,7 +99,7 @@ namespace utils {
       }
    }
 
-   unsigned getTextureIndex(char pieceType) {
+   unsigned getTextureIndex(const char &pieceType) {
       unsigned int index{ 0u };
       switch (pieceType){
          case 'K':

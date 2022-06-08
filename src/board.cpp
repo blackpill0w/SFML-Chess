@@ -16,6 +16,7 @@ Board::Board() : pieces{}, turn{ WHITE }
    // pieces.emplace_back(make_unique< Knight >( Knight(&pieces, &turn, 'N', "b8") ));
    // pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'P', "a2") ));
    // pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'P', "b2") ));
+   pieces.reserve(3);
    pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'P', "c2") ));
    pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'p', "a6") ));
    pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'p', "b6") ));

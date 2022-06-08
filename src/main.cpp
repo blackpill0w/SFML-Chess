@@ -37,8 +37,8 @@ int main() {
    // Help with moving pieces
    sf::Vector2f mousePos;
    bool mouseReleased{ false };
-   unsigned piecePressedIndex{ utils::g_max_uint };
-   unsigned int spriteClickedIndex{ utils::g_max_uint };
+   unsigned piecePressedIndex{ utils::invalidIndex };
+   unsigned int spriteClickedIndex{ utils::invalidIndex };
    string from;
    string to;
    cout << "\n\n";
@@ -56,9 +56,9 @@ int main() {
          else if (event.type == sf::Event::MouseButtonReleased) {
             mouseReleased = true;
          }
-         else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A) {
-            cout << "spriteClickedIndex: "  <<  spriteClickedIndex << std::endl;
-         }
+         // For debugging
+         // else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A) {
+         // }
       }
       window.clear();
 
@@ -67,7 +67,7 @@ int main() {
       mousePos = sf::Vector2f(sf::Mouse::getPosition(window));
       window.draw(board);
 
-      if (spriteClickedIndex != utils::g_max_uint) {
+      if (spriteClickedIndex != utils::invalidIndex) {
          // Make sure the piece stays inside the board when moving it
          if (mousePos.x < (utils::pieceSize / 2))
             mousePos.x = (utils::pieceSize / 2);
@@ -83,18 +83,15 @@ int main() {
       }
       if (mouseReleased) {
          mouseReleased = false;
-         if (spriteClickedIndex != utils::g_max_uint) {
+         if (spriteClickedIndex != utils::invalidIndex) {
             to = utils::posToStr(mousePos);
-            // Tell the board to move (the moving piece is deduced from the var 'from')
+            // Tell the board to move (the moving piece is deduced from the variable 'from')
             b.move(from, to);
-            // sprites[spriteClickedIndex]->move( sf::Vector2f(-200, -200) );
-            if ( b.pieces.size() != sprites.size() ) {
-               piecePressedIndex = b.getIndexOfPieceAt(to);
-            }
+            sprites[spriteClickedIndex]->move( sf::Vector2f(-200, -200) );
             // No need to check because the piece's position won't change
             // if the move is invalid
             sprites[spriteClickedIndex]->move( utils::strToVectorf(b.pieces[piecePressedIndex]->pos) );
-            spriteClickedIndex = utils::g_max_uint;
+            spriteClickedIndex = utils::invalidIndex;
             for (auto& sprite: sprites) {
                sprite->update();
             }
@@ -103,9 +100,8 @@ int main() {
       for (auto& sprite: sprites) {
          sprite->draw();
       }
-      if (spriteClickedIndex != utils::g_max_uint) {
+      if (spriteClickedIndex != utils::invalidIndex) {
          sprites[spriteClickedIndex]->draw();
-         utils::checkDeadSprites(&sprites);
       }
       b.update();
 
