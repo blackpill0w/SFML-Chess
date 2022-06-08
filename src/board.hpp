@@ -48,7 +48,7 @@ public:
    //** the piece to be moved is deduced from the 'from' var
    //**
    //********************************************
-   bool move(std::string &from, std::string &to);
+   bool move(string &from, string &to, const char &pieceToPromoteTo = 0);
 
    //********************************************
    //**
@@ -79,14 +79,24 @@ protected:
    //** Remove a piece from the board (taking a piece).
    //**
    //********************************************
-   void removePiece(unsigned index);
+   void removePiece(unsigned &index);
 
    //********************************************
    //**
    //** Handle castling.
    //**
    //********************************************
-   void castle(unsigned movingPieceIndex, string from, string to);
+   bool isMoveCastle(unsigned &movingPieceIndex, string &from, string &to);
+
+   void checkEnableEnPassant(unsigned &movingPieceIndex, string &from, string &to);
+
+   unsigned checkIfMoveWasEnPassant(unsigned &movingPieceIndex, string &from, string &to);
+
+   void checkTaking(unsigned &movingPieceIndex, string &from, string &to);
+
+   void checkDisableEnPassant();
+
+   void checkPromoting(unsigned &movingPieceIndex, const char &pieceToPromoteTo);
 };
 
 #endif

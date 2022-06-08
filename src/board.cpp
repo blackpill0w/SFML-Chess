@@ -2,12 +2,12 @@
 
 Board::Board() : pieces{}, turn{ WHITE }
 {
-   // pieces.emplace_back(make_unique< Rook >( Rook(&pieces, 'R', "a1") ));
-   // pieces.emplace_back(make_unique< Rook >( Rook(&pieces, 'R', "h1") ));
-   // pieces.emplace_back(make_unique< Rook >( Rook(&pieces, 'r', "a8") ));
-   // pieces.emplace_back(make_unique< Rook >( Rook(&pieces, 'r', "h8") ));
-   // pieces.emplace_back(make_unique< King >( King(&pieces, 'K', "e1") ));
-   // pieces.emplace_back(make_unique< King >( King(&pieces, 'k', "e8") ));
+   pieces.emplace_back(make_unique< Rook >( Rook(&pieces, &turn, 'R', "a1") ));
+   pieces.emplace_back(make_unique< Rook >( Rook(&pieces, &turn, 'R', "h1") ));
+   pieces.emplace_back(make_unique< Rook >( Rook(&pieces, &turn, 'r', "a8") ));
+   pieces.emplace_back(make_unique< Rook >( Rook(&pieces, &turn, 'r', "h8") ));
+   pieces.emplace_back(make_unique< King >( King(&pieces, &turn, 'K', "e1") ));
+   pieces.emplace_back(make_unique< King >( King(&pieces, &turn, 'k', "e8") ));
    // pieces.emplace_back(make_unique< Queen >( Queen(&pieces, 'Q', "e3") ));
    // pieces.emplace_back(make_unique< Queen >( Queen(&pieces, 'q', "h8") ));
    // pieces.emplace_back(make_unique< Bishop >( Bishop(&pieces, 'B', "a8") ));
@@ -45,7 +45,7 @@ void Board::changeTurn() {
    }
 }
 
-void Board::removePiece(unsigned index) {
+void Board::removePiece(unsigned &index) {
    pieces[index]->alive = false;
    pieces[index]->legalMoves.clear();
    pieces[index]->pos = "  ";
@@ -53,16 +53,108 @@ void Board::removePiece(unsigned index) {
    pieces[index]->attackingPositions[1] = "";
 }
 
-void Board::castle(unsigned movingPieceIndex, string from, string to) {
-   if (to[0] > from[0]) {
-      pieces[movingPieceIndex]->shortCastle();
+bool Board::isMoveCastle(unsigned &movingPieceIndex, string &from, string &to) {
+   bool castled{ false };
+   if (tolower(pieces[movingPieceIndex]->type) == 'k' && abs(to[0] - from[0]) == 2) {
+      castled = true;
+      if (to[0] > from[0]) {
+         pieces[movingPieceIndex]->shortCastle();
+      }
+      else {
+         pieces[movingPieceIndex]->longCastle();
+      }
    }
-   else {
-      pieces[movingPieceIndex]->longCastle();
+   return castled;
+}
+
+void Board::checkEnableEnPassant(unsigned &movingPieceIndex, string &from, string &to) {
+   if (tolower(pieces[movingPieceIndex]->type) == 'p') {
+      if (abs(to[1] - from[1]) == 2) {
+         pieces[movingPieceIndex]->enPassant = true;
+      }
    }
 }
 
-bool Board::move(std::string &from, std::string &to) {
+void Board::checkDisableEnPassant() {
+   for (auto& piece: pieces) {
+      // Piece's should equals turn because the turn changes before
+      // this function is run
+      if (tolower(piece->type) == 'p' && piece->color == turn) {
+         if (piece->enPassant) {
+            piece->enPassant = false;
+         }
+      }
+   }
+}
+
+unsigned Board::checkIfMoveWasEnPassant(unsigned &movingPieceIndex, string &from, string &to) {
+   unsigned pieceToBeRemoveIndex{ 65u };
+
+   if (tolower(pieces[movingPieceIndex]->type) == 'p' && to[0] != from[0]) {
+      // Making the pos of piece being en-passant-ed (pawn to be taken)
+      //** y is 1 step the opposite way the moving (the pawn en-passant-ing) pawn moves
+      string y{ pieces[movingPieceIndex]->pos[1] };
+      y[0] -= pieces[movingPieceIndex]->movementDirection;
+
+      string EPpos{ pieces[movingPieceIndex]->pos[0] + y };
+
+      for (unsigned i=0; i < pieces.size(); i++) {
+         if (tolower(pieces[i]->type) == 'p') {
+            if (pieces[i]->enPassant && pieces[i]->pos == EPpos) {
+               pieceToBeRemoveIndex = i;
+               break;
+            }
+         }
+      }
+   }
+   return pieceToBeRemoveIndex;
+}
+
+void Board::checkTaking(unsigned &movingPieceIndex, string &from, string &to) {
+   unsigned pieceToBeRemoveIndex{ 65u };
+   pieceToBeRemoveIndex = getIndexOfPieceAt(pieces[movingPieceIndex]->pos, pieces[movingPieceIndex]->color);
+
+   //** Check en passant
+   if (pieceToBeRemoveIndex == 65u) {
+      pieceToBeRemoveIndex = checkIfMoveWasEnPassant(movingPieceIndex, from, to);
+   }
+   if (pieceToBeRemoveIndex != 65u) {
+      removePiece(pieceToBeRemoveIndex);
+   }
+}
+
+void Board::checkPromoting(unsigned &movingPieceIndex, const char &pieceToPromoteTo) {
+   if (pieceToPromoteTo != 0 && tolower(pieces[movingPieceIndex]->type) == 'p') {
+      if (pieces[movingPieceIndex]->pos[1] == '1' || pieces[movingPieceIndex]->pos[1] == '8') {
+         unique_ptr< Piece > newPiece{ nullptr };
+         switch (pieceToPromoteTo) {
+            case 'Q':
+            case 'q':
+               newPiece = make_unique< Queen >( Queen(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos) );
+               break;
+            case 'R':
+            case 'r':
+               newPiece = make_unique< Rook >( Rook(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos) );
+               break;
+            case 'B':
+            case 'b':
+               newPiece = make_unique< Bishop >( Bishop(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos) );
+               break;
+            case 'N':
+            case 'n':
+               newPiece = make_unique< Knight >( Knight(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos) );
+               break;
+         }
+         // TODO:
+         // This doesn't work because you can't use the = operator
+         // with smart pointers (deleted function), and that's what replace
+         // does, see the source code
+         std::replace( pieces.begin(), pieces.end(), pieces[movingPieceIndex], newPiece );
+      }
+   }
+}
+
+bool Board::move(string &from, string &to, const char &pieceToPromoteTo) {
    bool moveSuccess{ false };
    unsigned movingPieceIndex{ 65u }; // More than a chess board can contain
 
@@ -75,52 +167,23 @@ bool Board::move(std::string &from, std::string &to) {
       moveSuccess = true;
       pieces[movingPieceIndex]->hasMoved = true;
       changeTurn();
-      // Check castling
-      //** If it's a king and moving away 2 steps
-      if (tolower(pieces[movingPieceIndex]->type) == 'k' && abs(to[0] - from[0]) == 2) {
-         castle(movingPieceIndex, from, to);
-      }
-      else {
+      //** If the move is not castle, else, everything is done
+      //** inside the isMoveCastle() function
+      if ( !isMoveCastle(movingPieceIndex, from, to) ) {
          //** Check wether to enable en passant
-         if (tolower(pieces[movingPieceIndex]->type) == 'p') {
-            if (abs(to[1] - from[1]) == 2) {
-               pieces[movingPieceIndex]->enPassant = true;
-            }
-         }
+         checkEnableEnPassant(movingPieceIndex, from, to);
+
+         // Put the piece in the new position
          pieces[movingPieceIndex]->pos = to;
+
          //** Take piece is there is any
-         unsigned pieceToRemoveIndex{ 65u };
-         pieceToRemoveIndex = getIndexOfPieceAt(pieces[movingPieceIndex]->pos, pieces[movingPieceIndex]->color);
-         //** Check en passant
-         if (pieceToRemoveIndex == 65u && tolower(pieces[movingPieceIndex]->type) == 'p' && to[0] != from[0]) {
-            // Making the pos of piece being en-passant-ed (pawn to be taken)
-            //** y is 1 step the opposite way the moving (the pawn en-passant-ing) pawn moves
-            string y{ pieces[movingPieceIndex]->pos[1] };
-            y[0] -= pieces[movingPieceIndex]->movementDirection;
-
-            string EPpos{ pieces[movingPieceIndex]->pos[0] + y };
-
-            for (unsigned i=0; i < pieces.size(); i++) {
-               if (tolower(pieces[i]->type) == 'p') {
-                  if (pieces[i]->enPassant && pieces[i]->pos == EPpos) {
-                     pieceToRemoveIndex = i;
-                     break;
-                  }
-               }
-            }
-         }
-         if (pieceToRemoveIndex < pieces.size()) {
-            removePiece(pieceToRemoveIndex);
-         }
+         checkTaking(movingPieceIndex, from, to);
       }
       // Disable en passant
-      for (auto& piece: pieces) {
-         if (tolower(piece->type) == 'p' && piece->color != pieces[movingPieceIndex]->color) {
-            if (piece->enPassant) {
-               piece->enPassant = false;
-            }
-         }
-      }
+      checkDisableEnPassant();
+
+      // Check promoting
+      // checkPromoting(movingPieceIndex, pieceToPromoteTo);
    }
    return moveSuccess;
 }

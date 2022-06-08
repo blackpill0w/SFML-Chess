@@ -41,7 +41,6 @@ int main() {
    unsigned int spriteClickedIndex{ utils::invalidIndex };
    string from;
    string to;
-   cout << "\n\n";
    while (window.isOpen()) {
       sf::Event event;
       while (window.pollEvent(event)) {
@@ -86,7 +85,7 @@ int main() {
          if (spriteClickedIndex != utils::invalidIndex) {
             to = utils::posToStr(mousePos);
             // Tell the board to move (the moving piece is deduced from the variable 'from')
-            b.move(from, to);
+            b.move(from, to, 'q');
             sprites[spriteClickedIndex]->move( sf::Vector2f(-200, -200) );
             // No need to check because the piece's position won't change
             // if the move is invalid
