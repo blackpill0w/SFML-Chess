@@ -17,7 +17,7 @@ Board::Board() : pieces{}, turn{ WHITE }
    // pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'P', "a2") ));
    // pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'P', "b2") ));
    pieces.reserve(3);
-   pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'P', "c2") ));
+   pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'P', "c7") ));
    pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'p', "a6") ));
    pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'p', "b6") ));
    // pieces.emplace_back(make_unique< Pawn >( Pawn(&pieces, &turn, 'p', "c6") ));
@@ -124,32 +124,29 @@ void Board::checkTaking(unsigned &movingPieceIndex, string &from, string &to) {
 }
 
 void Board::checkPromoting(unsigned &movingPieceIndex, const char &pieceToPromoteTo) {
+   // What's happening here is basically
    if (pieceToPromoteTo != 0 && tolower(pieces[movingPieceIndex]->type) == 'p') {
       if (pieces[movingPieceIndex]->pos[1] == '1' || pieces[movingPieceIndex]->pos[1] == '8') {
-         unique_ptr< Piece > newPiece{ nullptr };
+         Piece* newPiece{ nullptr };
          switch (pieceToPromoteTo) {
             case 'Q':
             case 'q':
-               newPiece = make_unique< Queen >( Queen(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos) );
+               newPiece = new Queen(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos);
                break;
             case 'R':
             case 'r':
-               newPiece = make_unique< Rook >( Rook(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos) );
+               newPiece = new Rook(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos);
                break;
             case 'B':
             case 'b':
-               newPiece = make_unique< Bishop >( Bishop(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos) );
+               newPiece = new Bishop(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos);
                break;
             case 'N':
             case 'n':
-               newPiece = make_unique< Knight >( Knight(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos) );
+               newPiece = new Knight(&pieces, &turn, pieceToPromoteTo, pieces[movingPieceIndex]->pos);
                break;
          }
-         // TODO:
-         // This doesn't work because you can't use the = operator
-         // with smart pointers (deleted function), and that's what replace
-         // does, see the source code
-         std::replace( pieces.begin(), pieces.end(), pieces[movingPieceIndex], newPiece );
+         pieces[movingPieceIndex].reset( newPiece );
       }
    }
 }
@@ -183,7 +180,7 @@ bool Board::move(string &from, string &to, const char &pieceToPromoteTo) {
       checkDisableEnPassant();
 
       // Check promoting
-      // checkPromoting(movingPieceIndex, pieceToPromoteTo);
+      checkPromoting(movingPieceIndex, pieceToPromoteTo);
    }
    return moveSuccess;
 }

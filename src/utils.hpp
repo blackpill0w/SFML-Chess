@@ -35,6 +35,8 @@ namespace utils {
    extern const sf::String gameTitle;
    //** Initial position of window
    extern const sf::Vector2i wInitialPos;
+   //** Font
+   extern const string fontFile;
    //** Path to texture of the board
    extern const string boardTexture;
    //** Path to textures of the pieces

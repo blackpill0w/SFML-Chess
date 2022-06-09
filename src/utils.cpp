@@ -11,6 +11,7 @@ namespace utils {
    extern const unsigned int wHeight{ static_cast< unsigned >(boardSize) };
    extern const sf::String gameTitle{ "Chess" };
    extern const sf::Vector2i wInitialPos(100, 100);
+   extern const string fontFile{ "assets/fonts/UbuntuMono-R.ttf" };
    extern const string boardTexture{ "assets/img/chess-board.png" };
 
    string textures[12] = {
@@ -27,6 +28,7 @@ namespace utils {
       "assets/img/pieces/wp.png",
       "assets/img/pieces/bp.png"
     };
+
 
    sf::Vector2f adjustMousePos(const sf::Vector2f &mousePos) {
       sf::Vector2f m;

@@ -1,8 +1,9 @@
 #include "pieceSprite.hpp"
 
-PieceSprite::PieceSprite(sf::Texture &txtr, unsigned &pieceIndex, Board *board, sf::RenderWindow *window)
-:  sprite{ sf::Sprite(txtr) }, window{ window }, pieceIndex{ pieceIndex },
-   board{ board }, alive{ true }, pos{ (*board).pieces[pieceIndex]->pos }
+PieceSprite::PieceSprite(const sf::Texture &txtr, unsigned &pieceIndex, Board *board, sf::RenderWindow *window)
+:  sprite{ sf::Sprite(txtr) }, window{ window },
+   pieceIndex{ pieceIndex }, board{ board }, alive{ true },
+   pos{ (*board).pieces[pieceIndex]->pos }, pieceType{ (*board).pieces[pieceIndex]->type }
 {
    sprite.setScale(70/sprite.getGlobalBounds().width, 70/sprite.getGlobalBounds().height);
    sprite.setPosition(utils::strToVectorf( pos ));
@@ -10,7 +11,7 @@ PieceSprite::PieceSprite(sf::Texture &txtr, unsigned &pieceIndex, Board *board, 
 
 PieceSprite::PieceSprite(const PieceSprite& other)
 : sprite{ sf::Sprite() }, window{ other.window }, pieceIndex{ other.pieceIndex },
-  board{ other.board }, alive{ other.alive }, pos{ other.pos }
+  board{ other.board }, alive{ other.alive }, pos{ other.pos }, pieceType{ other.pieceType }
 {
    sprite.setTexture(*other.sprite.getTexture());
    sprite.setPosition(other.sprite.getPosition());
@@ -25,6 +26,10 @@ void PieceSprite::draw() {
    if (alive) {
       window->draw(sprite);
    }
+}
+
+void PieceSprite::changeTexture(const sf::Texture& newTexture) {
+   sprite.setTexture(newTexture);
 }
 
 void PieceSprite::update() {

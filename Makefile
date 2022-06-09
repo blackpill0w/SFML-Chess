@@ -4,10 +4,12 @@ LDFLAGS = -l sfml-window -l sfml-system -l sfml-graphics
 
 SRC=src
 
-chess: pieceSprite.o utils.o piece.o king.o queen.o rook.o bishop.o knight.o pawn.o board.o main.o
+chess: pieceSprite.o utils.o piece.o king.o queen.o rook.o bishop.o knight.o pawn.o board.o game.o main.o
 	${CXX} ${CXXFLAGS} ${LDFLAGS} $^ -o $@
 main.o: ${SRC}/main.cpp
 	${CXX} ${CXXFLAGS} -c ${SRC}/main.cpp
+game.o: ${SRC}/game.cpp ${SRC}/game.hpp
+	${CXX} ${CXXFLAGS} -c ${SRC}/game.cpp
 pieceSprite.o: ${SRC}/pieceSprite.cpp ${SRC}/pieceSprite.hpp
 	${CXX} ${CXXFLAGS} -c ${SRC}/pieceSprite.cpp
 board.o: ${SRC}/board.hpp ${SRC}/board.cpp

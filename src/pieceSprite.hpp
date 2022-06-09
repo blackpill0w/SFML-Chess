@@ -29,13 +29,15 @@ public:
    Board *board;
    bool alive;
    string pos;
+   char pieceType;
 public:
-   PieceSprite(sf::Texture &txtr, unsigned &pieceIndex, Board *board, sf::RenderWindow *window);
+   PieceSprite(const sf::Texture &txtr, unsigned &pieceIndex, Board *board, sf::RenderWindow *window);
 
    PieceSprite(const PieceSprite& other);
    PieceSprite operator=(const PieceSprite& other) = delete;
 
    void move(const sf::Vector2f &pos);
+   void changeTexture(const sf::Texture& newTexture);
    void draw();
    void update();
 

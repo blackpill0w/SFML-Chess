@@ -20,7 +20,10 @@ using std::find;
 //**
 //** A class to handle the game's logic,
 //** the board is a vector of unique_ptr
-//** to the 'Piece' class (abstract class)
+//** to the 'Piece' class (abstract class).
+//**
+//** This class is completely seperate from
+//** the gui.
 //**
 //********************************************
 
