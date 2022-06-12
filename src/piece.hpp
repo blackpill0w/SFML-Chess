@@ -31,6 +31,9 @@ public:
    string attackingPositions[2];
    bool enPassant;
    int movementDirection;
+   // WARNING: Only for king
+   unsigned shortCastleRookIndex{ 0u };
+   unsigned longCastleRookIndex{ 0u };
 public:
    Piece(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
 
@@ -72,6 +75,7 @@ public:
    virtual void update();
 
    //** For kings
+   //**
    //********************************************
    //**
    //** Handles castling.
@@ -79,6 +83,12 @@ public:
    //********************************************
    virtual void shortCastle();
    virtual void longCastle();
+   //********************************************
+   //**
+   //** Save rooks indices, helps with castling.
+   //**
+   //********************************************
+   virtual void setRooksIndex();
 protected:
    //********************************************
    //**

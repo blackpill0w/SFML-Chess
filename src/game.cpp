@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-void playGame() {
+void playGame(const string &fenStr) {
    // Window
    sf::RenderWindow window(
       sf::VideoMode(utils::wWidth, utils::wHeight),
@@ -19,7 +19,7 @@ void playGame() {
       utils::boardSize / boardSprite.getGlobalBounds().height
    );
 
-   Board board = Board();
+   Board board(fenStr);
 
    // Load textures (12 for 6 pieces & 2 colors)
    vector< sf::Texture > textures(12, sf::Texture());
@@ -49,15 +49,19 @@ void playGame() {
          }
          else if (event.type == sf::Event::MouseButtonPressed) {
             spritePressedIndex = utils::getSpriteIndexAt(sprites, mousePos);
+            piecePressedIndex = sprites[spritePressedIndex]->pieceIndex;
             from = utils::posToStr(mousePos);
-            piecePressedIndex = board.getIndexOfPieceAt(from);
          }
          else if (event.type == sf::Event::MouseButtonReleased) {
             mouseReleased = true;
          }
          //** For debugging
-         // else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A) {
-         // }
+         else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::U) {
+            board.undoLastMove();
+            for (auto& sprite: sprites) {
+               sprite->update();
+            }
+         }
       }
       window.clear();
 
@@ -65,20 +69,20 @@ void playGame() {
 
       mousePos = sf::Vector2f(sf::Mouse::getPosition(window));
       window.draw(boardSprite);
-
       if (spritePressedIndex != utils::invalidIndex) {
          // Make sure the piece stays inside the board when moving it
          keepPieceInsideBoard(mousePos);
          // Follow the mouse
          sprites[spritePressedIndex]->move({mousePos.x - (utils::pieceSize / 2), mousePos.y - (utils::pieceSize / 2)});
-         utils::highlightMoves(&window, &board, piecePressedIndex);
+         if (board.pieces[piecePressedIndex]->color == board.turn) {
+            utils::highlightMoves(&window, &board, piecePressedIndex);
+         }
       }
       if (mouseReleased) {
          mouseReleased = false;
          if (spritePressedIndex != utils::invalidIndex) {
             to = utils::posToStr(mousePos);
-            // Handle promotion
-            checkPromotion(&window, sprites, boardSprite, spritePressedIndex, textures, pieceToPromoteTo, to);
+            checkPromotion(&window, sprites, boardSprite, spritePressedIndex, pieceToPromoteTo, to);
             makeMove(board, from, to, pieceToPromoteTo, piecePressedIndex, sprites, spritePressedIndex);
          }
       }
@@ -91,7 +95,7 @@ void playGame() {
    }
 }
 
-void keepPieceInsideBoard(sf::Vector2f pos) {
+void keepPieceInsideBoard(sf::Vector2f &pos) {
    if (pos.x < (utils::pieceSize / 2))
       pos.x = (utils::pieceSize / 2);
    else if (pos.x > utils::boardSize - (utils::pieceSize / 2))
@@ -122,29 +126,8 @@ void loadSprites(
    sf::RenderWindow &window
 ) {
    for (unsigned i=0u; i < board.pieces.size(); i++) {
-      unsigned textureIndex{ 0u };
-      textureIndex = utils::getTextureIndex(board.pieces[i]->type);
-      PieceSprite temp(textures[textureIndex], i, &board, &window);
+      PieceSprite temp(&textures, i, &board, &window);
       sprites.emplace_back(make_unique<PieceSprite>(temp));
-   }
-}
-
-void checkPromotion(
-   sf::RenderWindow *window,
-   vector< unique_ptr<PieceSprite> > &sprites,
-   sf::Sprite &boardSprite,
-   unsigned &spritePressedIndex,
-   const vector< sf::Texture > &textures,
-   char &pieceToPromoteTo,
-   string &to
-) {
-   if ( tolower(sprites[spritePressedIndex]->pieceType) == 'p' && (to[1] == '1' || to[1] == '8')) {
-      // Get the type of piece to promote to
-      pieceToPromoteTo = getPieceToPromoteTo(window, boardSprite, &sprites, spritePressedIndex);
-      // Change type
-      sprites[spritePressedIndex]->pieceType = pieceToPromoteTo;
-      // Change texture
-      sprites[spritePressedIndex]->changeTexture(textures[utils::getTextureIndex(pieceToPromoteTo)]);
    }
 }
 
@@ -168,6 +151,20 @@ void makeMove(
    spritePressedIndex = utils::invalidIndex;
    for (auto& sprite: sprites) {
       sprite->update();
+   }
+}
+
+void checkPromotion(
+   sf::RenderWindow *window,
+   vector< unique_ptr<PieceSprite> > &sprites,
+   sf::Sprite &boardSprite,
+   unsigned &spritePressedIndex,
+   char &pieceToPromoteTo,
+   string &to
+) {
+   if ( tolower(sprites[spritePressedIndex]->pieceType) == 'p' && (to[1] == '1' || to[1] == '8')) {
+      // Get the type of piece to promote to
+      pieceToPromoteTo = getPieceToPromoteTo(window, boardSprite, &sprites, spritePressedIndex);
    }
 }
 
@@ -255,9 +252,11 @@ char getPieceToPromoteTo(
       }
 
       window->draw(board);
+      // Draw pieces
       for (auto& s: *sprites) {
          s->draw();
       }
+      // Draw promotion menu
       for (int i=0; i<4; i++) {
          window->draw(rects[i]);
          window->draw(texts[i]);
@@ -265,6 +264,7 @@ char getPieceToPromoteTo(
 
       window->display();
    }
+   // Match cas of the choice with the piece (make them have the same color)
    if ( isupper( (*sprites)[pieceToBePromotedIndex]->pieceType ) ) {
       piece = toupper(piece);
    }

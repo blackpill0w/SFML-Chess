@@ -8,12 +8,12 @@ Rook::Rook(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const ch
 void Rook::setLegalMoves() {
    legalMoves.clear();
 
-   /*********************
-   *
-   *  Loop through every direction (4 in total for a rook) and depending on the piece,
-   *  the 'canMoveToPos()' method checks wether it's a valid move.
-   *
-   *********************/
+   //*********************
+   //**
+   //**  Loop through every direction (4 in total for a rook) and depending on the piece,
+   //**  the 'canMoveToPos()' method checks wether it's a valid move.
+   //**
+   //**********************
    char directionX[3] = {0, 1, -1};
    char directionY[3] = {0, 1, -1};
 

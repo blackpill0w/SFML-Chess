@@ -4,7 +4,7 @@
 #include "utils.hpp"
 #include "board.hpp"
 
-void playGame();
+void playGame(const string &fenStr = "");
 
 void loadSprites(
    vector< unique_ptr<PieceSprite> > &sprites,
@@ -13,7 +13,7 @@ void loadSprites(
    sf::RenderWindow &window
 );
 
-void keepPieceInsideBoard(sf::Vector2f pos);
+void keepPieceInsideBoard(sf::Vector2f &pos);
 
 void draw(
    vector< unique_ptr<PieceSprite> > &sprites,
@@ -25,7 +25,6 @@ void checkPromotion(
    vector< unique_ptr<PieceSprite> > &sprites,
    sf::Sprite &boardSprite,
    unsigned &spritePressedIndex,
-   const vector< sf::Texture > &textures,
    char &pieceToPromoteTo,
    string &to
 );

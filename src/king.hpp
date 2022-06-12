@@ -5,12 +5,9 @@
 
 class King : public Piece {
 public:
-   unsigned shortCastleRookIndex;
-   unsigned longCastleRookIndex;
-public:
    King(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
    void setLegalMoves() override;
-   void setRooksIndex();
+   void setRooksIndex() override;
    void shortCastle() override;
    void longCastle() override;
 protected:

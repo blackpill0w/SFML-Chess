@@ -39,11 +39,6 @@ PieceColor Piece::isPosOccupied(const string &pos) {
    return colorOfOccupyingPiece;
 }
 
-void Piece::longCastle() {
-}
-void Piece::shortCastle() {
-}
-
 bool Piece::canPosBeAttacked(const string &position, const PieceColor &color) {
    bool canBeAttacked{ false };
    for (auto& piece: *pieces) {
@@ -104,3 +99,8 @@ void Piece::update() {
 bool Piece::isValidMove(const string &move) {
    return ( find(legalMoves.begin(), legalMoves.end(), move) != legalMoves.end() );
 }
+
+//** Only for kings
+void Piece::longCastle() {}
+void Piece::shortCastle() {}
+void Piece::setRooksIndex() {}

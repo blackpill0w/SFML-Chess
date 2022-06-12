@@ -1,9 +1,8 @@
 #include "king.hpp"
 
 King::King(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos)
-: Piece(pieces, turn, type, pos), shortCastleRookIndex{ 0u }, longCastleRookIndex{ 0u }
+: Piece(pieces, turn, type, pos)
 {
-   setRooksIndex();
 }
 
 void King::setRooksIndex() {

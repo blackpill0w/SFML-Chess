@@ -23,6 +23,7 @@ using std::unique_ptr;
 class PieceSprite {
 
 public:
+   const vector<sf::Texture> *textures;
    sf::Sprite sprite;
    sf::RenderWindow *window;
    unsigned pieceIndex;
@@ -31,13 +32,13 @@ public:
    string pos;
    char pieceType;
 public:
-   PieceSprite(const sf::Texture &txtr, unsigned &pieceIndex, Board *board, sf::RenderWindow *window);
+   PieceSprite(const vector<sf::Texture> *textures, unsigned &pieceIndex, Board *board, sf::RenderWindow *window);
 
    PieceSprite(const PieceSprite& other);
    PieceSprite operator=(const PieceSprite& other) = delete;
 
    void move(const sf::Vector2f &pos);
-   void changeTexture(const sf::Texture& newTexture);
+   void changeTexture();
    void draw();
    void update();
 

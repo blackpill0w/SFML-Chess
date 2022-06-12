@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <variant>
+#include <array>
 
 #include "pieces.hpp"
 
@@ -13,7 +15,20 @@ using std::unique_ptr;
 using std::make_unique;
 using std::string;
 using std::vector;
+using std::array;
 using std::find;
+
+using MoveRepresentation = array< std::variant<unsigned, bool, string>, 8 >;
+
+// Enum to easily access elements in moveList class member
+enum : unsigned int {
+   moveListMovingPieceIndex = 0u,
+   moveListOldPos, moveListNewPos,
+   moveListPieceTakenIndex,
+   moveListIsEnPassant, moveListIsCastle,
+   moveListPieceHasMovedChanged,
+   moveListIsPromotion
+};
 
 //**
 //********************************************
@@ -43,15 +58,52 @@ public:
    //**
    //********************************************
    PieceColor turn;
+protected:
+   //********************************************
+   //**
+   //** Indices of the kings
+   //**
+   //********************************************
+   unsigned wKingIndex;
+   unsigned bKingIndex;
+   //********************************************
+   //**
+   //** A vector of arrays (8 elements, see the enum above)
+   //** containing variants (unsinged, bool, string).
+   //** It is used to save moves and to undo them.
+   //**
+   //********************************************
+   vector< MoveRepresentation > moveList;
 public:
-   Board();
+   //********************************************
+   //**
+   //** The constructor, takes an optional
+   //** parameter to load an FEN string.
+   //**
+   //********************************************
+   Board(const string &fenStr = "");
+
+   //********************************************
+   //**
+   //** The copy constructor.
+   //**
+   //********************************************
+   Board(const Board &other);
+
+   //********************************************
+   //**
+   //** Loads an FEN string.
+   //**
+   //********************************************
+   void loadFEN(const string &fenStr);
+
    //********************************************
    //**
    //** Moving a piece and everything that comes with that
-   //** the piece to be moved is deduced from the 'from' var
+   //** the piece to be moved is deduced from the 'from' var.
    //**
    //********************************************
-   bool move(string &from, string &to, const char &pieceToPromoteTo = 0);
+   bool move(const string &from, const string &to, const char &pieceToPromoteTo = 0);
 
    //********************************************
    //**
@@ -60,7 +112,7 @@ public:
    //** opposite color of the piece).
    //**
    //********************************************
-   unsigned getIndexOfPieceAt(const string &pos, const PieceColor &colorToBeDifferentFrom = NONE);
+   unsigned getIndexOfPieceAt(const string &pos, const PieceColor &colorToBeDifferentFrom = NONE, const bool &aliveState = true);
 
    //********************************************
    //**
@@ -68,6 +120,13 @@ public:
    //**
    //********************************************
    void update();
+
+   //********************************************
+   //**
+   //** Simple, undo the last move.
+   //**
+   //********************************************
+   void undoLastMove();
 
 protected:
    //********************************************
@@ -82,24 +141,57 @@ protected:
    //** Remove a piece from the board (taking a piece).
    //**
    //********************************************
-   void removePiece(unsigned &index);
+   void removePiece(const unsigned &index);
+
+   //********************************************
+   //**
+   //** Check if the move made was castle.
+   //**
+   //********************************************
+   bool isMoveCastle(const unsigned &movingPieceIndex, const string &from, const string &to);
 
    //********************************************
    //**
    //** Handle castling.
    //**
    //********************************************
-   bool isMoveCastle(unsigned &movingPieceIndex, string &from, string &to);
+   void handleCastling(const unsigned &movingPieceIndex, const string &from, const string &to);
 
-   void checkEnableEnPassant(unsigned &movingPieceIndex, string &from, string &to);
+   //********************************************
+   //**
+   //** Check if a pawn can be en-passant-ed.
+   //**
+   //********************************************
+   void checkEnableEnPassant(const unsigned &movingPieceIndex, const string &from, const string &to);
 
-   unsigned checkIfMoveWasEnPassant(unsigned &movingPieceIndex, string &from, string &to);
+   //********************************************
+   //**
+   //** Check if the move made was en passant.
+   //**
+   //********************************************
+   unsigned checkIfMoveWasEnPassant(const unsigned &movingPieceIndex, const string &from, const string &to);
 
-   void checkTaking(unsigned &movingPieceIndex, string &from, string &to);
+   //********************************************
+   //**
+   //** Check if the move made was a capture.
+   //**
+   //********************************************
+   void checkTaking(const unsigned &movingPieceIndex, const string &from, const string &to, MoveRepresentation &move);
 
+   //********************************************
+   //**
+   //** Check if en passant was legal for some pawn
+   //** and make it illegal.
+   //**
+   //********************************************
    void checkDisableEnPassant();
 
-   void checkPromoting(unsigned &movingPieceIndex, const char &pieceToPromoteTo);
+   //********************************************
+   //**
+   //** Check if the move made was a pawn promotion.
+   //**
+   //********************************************
+   void checkPromoting(const unsigned &movingPieceIndex, const char &pieceToPromoteTo, MoveRepresentation &move);
 };
 
 #endif
