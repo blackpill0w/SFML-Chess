@@ -524,7 +524,7 @@ void Board::handlePawnCheck() {
    unsigned pawnIndices[2] = { getIndexOfPieceAt(pawnPos1), getIndexOfPieceAt(pawnPos2) };
    for (auto& pawnI: pawnIndices) {
       if (pawnI != 65u) {
-         if (tolower(pieces[pawnI]->type) == 'p') {
+         if (tolower(pieces[pawnI]->type) == 'p' && pieces[pawnI]->color != pieces[kingIndex]->color) {
             for (unsigned i=0u; i < pieces.size(); i++) {
                if (pieces[i]->alive && pieces[i]->color == pieces[kingIndex]->color && pieces[kingIndex]->pos != pieces[i]->pos) {
                   removeMovesIfNotInVector(i, { pieces[pawnI]->pos });
@@ -549,7 +549,7 @@ void Board::handleKnightCheck() {
       temp[1] += direction[1];
       unsigned knightI{ getIndexOfPieceAt(temp) };
       if (knightI != 65u) {
-         if (tolower(pieces[knightI]->type) == 'k') {
+         if (tolower(pieces[knightI]->type) == 'n' && pieces[knightI]->color != pieces[kingIndex]->color) {
             for (unsigned i=0u; i < pieces.size(); i++) {
                if (pieces[i]->alive && pieces[i]->color == pieces[kingIndex]->color && pieces[kingIndex]->pos != pieces[i]->pos) {
                   removeMovesIfNotInVector(i, { pieces[knightI]->pos });
