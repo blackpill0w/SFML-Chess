@@ -192,6 +192,30 @@ protected:
    //**
    //********************************************
    void checkPromoting(const unsigned &movingPieceIndex, const char &pieceToPromoteTo, MoveRepresentation &move);
+
+   //********************************************
+   //**
+   //** Gives all the squares between two positions (inclusif)
+   //** moving in a given direction.
+   //**
+   //********************************************
+   vector< string > getAllSquaresInBetween(string &from, string &to, const int direction[2]);
+
+   //********************************************
+   //**
+   //** Given a vector of positions and an index of a piece,
+   //** every piece's possible move that is not in that vector
+   //** is removed.
+   //**
+   //********************************************
+   void removeMovesIfNotInVector(const unsigned &pieceIndex, const vector< string > &moves);
+
+   //********************************************
+   //**
+   //** Handle pins.
+   //**
+   //********************************************
+   void handlePins();
 };
 
 #endif

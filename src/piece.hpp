@@ -96,7 +96,13 @@ protected:
    //** vector.
    //**
    //********************************************
-   virtual void setLegalMoves() = 0;
+   virtual void setLegalMoves();
+   //********************************************
+   //**
+   //** Removes moves outside board (ex: e9...).
+   //**
+   //********************************************
+   void removeMovesOutsideBoard();
 
 };
 

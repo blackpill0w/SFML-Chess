@@ -146,7 +146,7 @@ void Board::checkDisableEnPassant() {
    for (auto& piece: pieces) {
       // Piece's should equals turn because the turn changes before
       // this function is run
-      if (tolower(piece->type) == 'p' && piece->color == turn) {
+      if (tolower(piece->type) == 'p' && piece->color == turn && piece->alive) {
          if (piece->enPassant) {
             piece->enPassant = false;
          }
@@ -166,7 +166,7 @@ unsigned Board::checkIfMoveWasEnPassant(const unsigned &movingPieceIndex, const 
       string EPpos{ pieces[movingPieceIndex]->pos[0] + y };
 
       for (unsigned i=0; i < pieces.size(); i++) {
-         if (tolower(pieces[i]->type) == 'p') {
+         if (tolower(pieces[i]->type) == 'p' && pieces[i]->alive) {
             if (pieces[i]->enPassant && pieces[i]->pos == EPpos) {
                pieceToBeRemoveIndex = i;
                break;
@@ -286,6 +286,7 @@ void Board::update() {
          piece->update();
       }
    }
+   handlePins();
 }
 
 void Board::undoLastMove() {
@@ -347,4 +348,85 @@ void Board::undoLastMove() {
       moveList.pop_back();
       changeTurn();
    }
+}
+
+void Board::removeMovesIfNotInVector(const unsigned &pieceIndex, const vector< string > &moves) {
+   for (unsigned i=0; i < pieces[pieceIndex]->legalMoves.size();) {
+      if (find(moves.begin(), moves.end(), pieces[pieceIndex]->legalMoves[i] ) != moves.end()) {
+         i++;
+      }
+      else {
+         // No need to increment 'i' because all elements are shifted after deletion of move
+         pieces[pieceIndex]->legalMoves.erase( pieces[pieceIndex]->legalMoves.begin() + i );
+      }
+   }
+}
+
+vector< string > Board::getAllSquaresInBetween(string &from, string &to, const int direction[2]) {
+   vector< string > moves{};
+   string x{ from[0] };
+   string y{ from[1] };
+   string temp{ x+y };
+   while (temp != to) {
+      temp[0] += direction[0];
+      temp[1] += direction[1];
+
+      moves.emplace_back(temp);
+   }
+   return moves;
+}
+
+void Board::handlePins() {
+   constexpr int directions[8][2] = {
+      {1, 0}, {-1, 0},
+      {0, 1}, {0, -1},
+      {1, 1}, {1, -1},
+      {-1, 1}, {-1, -1}
+   };
+   unsigned kingIndex{ turn == WHITE ? wKingIndex : bKingIndex };
+   string kingPos{ pieces[kingIndex]->pos };
+
+   for (unsigned i=0u; i < 8u; i++) {
+      string temp{ kingPos };
+      temp[0] += directions[i][0];
+      temp[1] += directions[i][1];
+
+      bool checkingForPinnedPiece{ true };
+      unsigned pinnedPieceIndex{ 1u };
+
+      while (temp[0] != 'h'+1 && temp[0] != 'a'-1 && temp[1] != '0' && temp[1] != '9') {
+         unsigned pieceIndex = getIndexOfPieceAt(temp);
+
+         if (pieceIndex != 65u) {
+            if (checkingForPinnedPiece) { // Looking for a piece to pin
+               if (pieces[pieceIndex]->color == pieces[kingIndex]->color) {
+                  pinnedPieceIndex = pieceIndex;
+                  checkingForPinnedPiece = false;
+               }
+            }
+            else { // Looking for the pinning piece
+               if (pieces[pieceIndex]->color != pieces[kingIndex]->color) {
+                  // The first 4 directions are horizontal and vertical
+                  // The other 4 are diagonals
+                  if (
+                     tolower(pieces[pieceIndex]->type == 'q')
+                     || (i < 4 && tolower(pieces[pieceIndex]->type) == 'r')
+                     || (i >= 4 && tolower(pieces[pieceIndex]->type) == 'b' )
+                  ) {
+                     vector<string> legalSquares{
+                        getAllSquaresInBetween(pieces[kingIndex]->pos, pieces[pieceIndex]->pos, directions[i])
+                     };
+                     removeMovesIfNotInVector(pinnedPieceIndex, legalSquares);
+                     // cout << "pinned: "  << pieces[pinnedPieceIndex]->pos << ", by: " << pieces[pieceIndex]->pos << '\n';
+                  }
+               }
+               break;
+            }
+         }
+         temp[0] += directions[i][0];
+         temp[1] += directions[i][1];
+      }
+   }
+
+
 }
