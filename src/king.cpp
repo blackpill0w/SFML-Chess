@@ -27,7 +27,7 @@ void King::checkCastle() {
    // y = 1 for WHITE or y = 8 for BLACK
    string y{ pos[1] };
 
-   if ( !(*pieces)[shortCastleRookIndex]->hasMoved ) {
+   if ( shortCastleRookIndex != 65u && !(*pieces)[shortCastleRookIndex]->hasMoved ) {
       // f1/f8 && g1/g8 shouldn't be occupied
       if (isPosOccupied("f"+y) == NONE && isPosOccupied("g"+y) == NONE) {
          // Also not attacked
@@ -36,7 +36,7 @@ void King::checkCastle() {
          }
       }
    }
-   if ( !(*pieces)[longCastleRookIndex]->hasMoved ) {
+   if ( shortCastleRookIndex != 65u && !(*pieces)[longCastleRookIndex]->hasMoved ) {
       // b1/b8 && c1/c8 && d1/d8 shouldn't be occupied
       if (isPosOccupied("b"+y) == NONE && isPosOccupied("c"+y) == NONE && isPosOccupied("d"+y) == NONE) {
          // c1/c8 && d1/d8 souldn't be attacked
@@ -77,11 +77,13 @@ void King::setLegalMoves() {
          }
          temp[0] = temp[0] + directionX[i];
          temp[1] = temp[1] + directionY[j];
+         if (temp[0] != 'h'+1 && temp[0] != 'a'-1 && temp[1] != '0' && temp[1] != '9') {
+            PieceColor pieceOccupyingColor{ isPosOccupied(temp) };
+            bool canKingBeAttacked{ canPosBeAttacked(temp, color) };
 
-         PieceColor pieceOccupyingColor{ isPosOccupied(temp) };
-         bool canKingBeAttacked{ canPosBeAttacked(temp, color) };
-         if ( pieceOccupyingColor != color && !canKingBeAttacked) {
-            legalMoves.push_back(temp);
+            if ( pieceOccupyingColor != color && !canKingBeAttacked) {
+               legalMoves.push_back(temp);
+            }
          }
       }
    }

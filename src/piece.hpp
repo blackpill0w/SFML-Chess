@@ -30,10 +30,10 @@ public:
    // WARNING: Only for pawns
    string attackingPositions[2];
    bool enPassant;
-   int movementDirection;
+   int pawnMovementDirection;
    // WARNING: Only for king
-   unsigned shortCastleRookIndex{ 0u };
-   unsigned longCastleRookIndex{ 0u };
+   unsigned shortCastleRookIndex{ 65u };
+   unsigned longCastleRookIndex{ 65u };
 public:
    Piece(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
 

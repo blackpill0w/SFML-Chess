@@ -161,7 +161,7 @@ unsigned Board::checkIfMoveWasEnPassant(const unsigned &movingPieceIndex, const 
       // Making the pos of piece being en-passant-ed (pawn to be taken)
       //** y is 1 step the opposite way the moving (the pawn en-passant-ing) pawn moves
       string y{ pieces[movingPieceIndex]->pos[1] };
-      y[0] -= pieces[movingPieceIndex]->movementDirection;
+      y[0] -= pieces[movingPieceIndex]->pawnMovementDirection;
 
       string EPpos{ pieces[movingPieceIndex]->pos[0] + y };
 
@@ -281,12 +281,14 @@ bool Board::move(const string &from, const string &to, const char &pieceToPromot
 
 void Board::update() {
    for (auto& piece: pieces) {
-      // No need to update all the pieces, only the ones to play
-      if (piece->alive && piece->color == turn){
+      if (piece->alive){
          piece->update();
       }
    }
+   pieces[wKingIndex]->update();
+   pieces[bKingIndex]->update();
    handlePins();
+   handleChecks();
 }
 
 void Board::undoLastMove() {
@@ -377,6 +379,16 @@ vector< string > Board::getAllSquaresInBetween(string &from, string &to, const i
 }
 
 void Board::handlePins() {
+   //********************************************
+   //**
+   //** Loop through the eight directions, if we find
+   //** a friend piece, we keep looking until we find another piece
+   //** (or the edge of the board), if the piece is an enemy
+   //** piece and can attack (depending on the direction),
+   //** remove all the moves for the friend piece except
+   //** the ones between the king and the attacking piece.
+   //**
+   //********************************************
    constexpr int directions[8][2] = {
       {1, 0}, {-1, 0},
       {0, 1}, {0, -1},
@@ -384,15 +396,14 @@ void Board::handlePins() {
       {-1, 1}, {-1, -1}
    };
    unsigned kingIndex{ turn == WHITE ? wKingIndex : bKingIndex };
-   string kingPos{ pieces[kingIndex]->pos };
 
    for (unsigned i=0u; i < 8u; i++) {
-      string temp{ kingPos };
+      string temp{ pieces[kingIndex]->pos };
       temp[0] += directions[i][0];
       temp[1] += directions[i][1];
 
       bool checkingForPinnedPiece{ true };
-      unsigned pinnedPieceIndex{ 1u };
+      unsigned pinnedPieceIndex{ 65u };
 
       while (temp[0] != 'h'+1 && temp[0] != 'a'-1 && temp[1] != '0' && temp[1] != '9') {
          unsigned pieceIndex = getIndexOfPieceAt(temp);
@@ -417,7 +428,6 @@ void Board::handlePins() {
                         getAllSquaresInBetween(pieces[kingIndex]->pos, pieces[pieceIndex]->pos, directions[i])
                      };
                      removeMovesIfNotInVector(pinnedPieceIndex, legalSquares);
-                     // cout << "pinned: "  << pieces[pinnedPieceIndex]->pos << ", by: " << pieces[pieceIndex]->pos << '\n';
                   }
                }
                break;
@@ -429,4 +439,123 @@ void Board::handlePins() {
    }
 
 
+}
+
+void Board::handleChecks() {
+   handleSlidingPiecesChecks();
+   handlePawnCheck();
+}
+
+void Board::handleSlidingPiecesChecks() {
+   //********************************************
+   //**
+   //** Loop through the eight directions, if we find
+   //** an enemy piece attacking the king,
+   //** remove all moves of the friend pieces
+   //** except the ones between the king and the attacking piece.
+   //**
+   //********************************************
+   constexpr int directions[8][2] = {
+      {1, 0}, {-1, 0},
+      {0, 1}, {0, -1},
+      {1, 1}, {1, -1},
+      {-1, 1}, {-1, -1}
+   };
+   unsigned kingIndex{ turn == WHITE ? wKingIndex : bKingIndex };
+   for (unsigned i=0u; i < 8u; i++) {
+      string temp{ pieces[kingIndex]->pos };
+      temp[0] += directions[i][0];
+      temp[1] += directions[i][1];
+
+      while (temp[0] != 'h'+1 && temp[0] != 'a'-1 && temp[1] != '0' && temp[1] != '9') {
+         unsigned pieceIndex = getIndexOfPieceAt(temp);
+         if (pieceIndex != 65u) {
+            if (pieces[pieceIndex]->color != pieces[kingIndex]->color) {
+               // The first 4 directions are horizontal and vertical
+               // The other 4 are diagonals
+               if (
+                  tolower(pieces[pieceIndex]->type == 'q')
+                  || (i < 4 && tolower(pieces[pieceIndex]->type) == 'r')
+                  || (i >= 4 && tolower(pieces[pieceIndex]->type) == 'b')
+               ) {
+                  vector<string> legalSquares{
+                     getAllSquaresInBetween(pieces[kingIndex]->pos, pieces[pieceIndex]->pos, directions[i])
+                  };
+                  for (unsigned j=0u; j < pieces.size(); j++) {
+                     if (pieces[j]->color == turn && pieces[j]->alive && pieces[j]->type != pieces[kingIndex]->type) {
+                        removeMovesIfNotInVector(j, legalSquares);
+                     }
+                  }
+
+                  //*****
+                  //** King might still be able to move to a position that is attacked
+                  //** ex: if we have a queen at <a1> and a king at <g1> (attacked),
+                  //**     the king is still able to go to <h1>
+                  //**     Q - - - - - - k ~
+                  //*****
+                  string temp2{ pieces[kingIndex]->pos };
+                  temp2[0] -= directions[i][0];
+                  temp2[1] -= directions[i][1];
+                  for (unsigned i=0u; i < pieces[kingIndex]->legalMoves.size(); i++) {
+                     if (pieces[kingIndex]->legalMoves[i] == temp2) {
+                        pieces[kingIndex]->legalMoves.erase(pieces[kingIndex]->legalMoves.begin() + i);
+                     }
+                  }
+
+               }
+            }
+            break;
+         }
+
+         temp[0] += directions[i][0];
+         temp[1] += directions[i][1];
+      }
+   }
+}
+
+void Board::handlePawnCheck() {
+   unsigned kingIndex{ turn == WHITE ? wKingIndex : bKingIndex };
+   string pawnPos1{ pieces[kingIndex]->pos };
+   string pawnPos2{ pieces[kingIndex]->pos };
+   pawnPos1[0]--;
+   pawnPos2[0]++;
+   pawnPos1[1] += pieces[kingIndex]->pawnMovementDirection;
+   pawnPos2[1] += pieces[kingIndex]->pawnMovementDirection;
+   unsigned pawnIndices[2] = { getIndexOfPieceAt(pawnPos1), getIndexOfPieceAt(pawnPos2) };
+   for (auto& pawnI: pawnIndices) {
+      if (pawnI != 65u) {
+         if (tolower(pieces[pawnI]->type) == 'p') {
+            for (unsigned i=0u; i < pieces.size(); i++) {
+               if (pieces[i]->alive && pieces[i]->color == pieces[kingIndex]->color && pieces[kingIndex]->pos != pieces[i]->pos) {
+                  removeMovesIfNotInVector(i, { pieces[pawnI]->pos });
+               }
+            }
+         }
+      }
+   }
+}
+
+void Board::handleKnightCheck() {
+   unsigned kingIndex{ turn == WHITE ? wKingIndex : bKingIndex };
+   constexpr int knightPossibleDirections[8][2] = {
+      {1, 2}, {-1, 2},
+      {1, -2}, {-1, -2},
+      {2, 1}, {-2, 1},
+      {2, -1}, {-2, -1}
+   };
+   for (auto& direction: knightPossibleDirections) {
+      string temp{ pieces[kingIndex]->pos };
+      temp[0] += direction[0];
+      temp[1] += direction[1];
+      unsigned knightI{ getIndexOfPieceAt(temp) };
+      if (knightI != 65u) {
+         if (tolower(pieces[knightI]->type) == 'k') {
+            for (unsigned i=0u; i < pieces.size(); i++) {
+               if (pieces[i]->alive && pieces[i]->color == pieces[kingIndex]->color && pieces[kingIndex]->pos != pieces[i]->pos) {
+                  removeMovesIfNotInVector(i, { pieces[knightI]->pos });
+               }
+            }
+         }
+      }
+   }
 }

@@ -7,7 +7,7 @@ Pawn::Pawn(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const ch
 
 void Pawn::checkEnPassant() {
    string movingDirection{ pos[1] };
-   movingDirection[0] += movementDirection;
+   movingDirection[0] += pawnMovementDirection;
 
    string right{ pos[0] };
    string left{ pos[0] };

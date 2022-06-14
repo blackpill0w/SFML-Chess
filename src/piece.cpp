@@ -3,7 +3,7 @@
 Piece::Piece(const Piece& other)
 : type{ other.type }, color{ other.color }, alive{ true }, pos{ other.pos },
   hasMoved{ other.hasMoved }, legalMoves{ "" }, pieces{ other.pieces }, turn{ other.turn },
-  enPassant{ other.enPassant }, movementDirection{ other.movementDirection }
+  enPassant{ other.enPassant }, pawnMovementDirection{ other.pawnMovementDirection }
 {
    // legalMoves
    legalMoves.clear();
@@ -18,14 +18,14 @@ Piece::Piece(const Piece& other)
 Piece::Piece(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos)
 : type{ type }, color{ BLACK }, alive{ true }, pos{ pos }, hasMoved{ false },
   legalMoves{ "" }, pieces{ pieces }, turn{ turn },
-  enPassant{ false }, movementDirection{ 1 }
+  enPassant{ false }, pawnMovementDirection{ 1 }
 {
    if (isupper(type)) {
       this->color = WHITE;
    }
    // Useful for pawns
    if (color == BLACK) {
-      movementDirection = -1;
+      pawnMovementDirection = -1;
    }
 }
 
@@ -70,10 +70,7 @@ bool Piece::canPosBeAttacked(const string &position, const PieceColor &color) {
          //**
          //*******************************************************
          else if (tolower(piece->type) == 'k' && piece->alive) {
-            if (
-               (abs(position[0] - piece->pos[0]) == 1 || abs(position[0] - piece->pos[0]) == 0)
-               && (abs(position[1] - piece->pos[1]) == 1 || abs(position[1] - piece->pos[1]) == 0)
-            ) {
+            if (abs(position[0] - piece->pos[0]) <= 1 && (abs(position[1] - piece->pos[1]) <= 1)) {
                canBeAttacked = true;
             }
          }
@@ -83,7 +80,7 @@ bool Piece::canPosBeAttacked(const string &position, const PieceColor &color) {
          //** Queens, rooks, bishops and knights.
          //**
          //*******************************************************
-         else if (piece->alive) {
+         else {
             if (find(piece->legalMoves.begin(), piece->legalMoves.end(), position) != piece->legalMoves.end()) {
                canBeAttacked = true;
             }

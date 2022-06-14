@@ -82,7 +82,9 @@ void playGame(const string &fenStr) {
          mouseReleased = false;
          if (spritePressedIndex != utils::invalidIndex) {
             to = utils::posToStr(mousePos);
-            checkPromotion(&window, sprites, boardSprite, spritePressedIndex, pieceToPromoteTo, to);
+            if (spritePressedIndex != utils::invalidIndex && board.pieces[piecePressedIndex]->isValidMove(to)) {
+               checkPromotion(&window, sprites, boardSprite, spritePressedIndex, pieceToPromoteTo, to);
+            }
             makeMove(board, from, to, pieceToPromoteTo, piecePressedIndex, sprites, spritePressedIndex);
          }
       }
