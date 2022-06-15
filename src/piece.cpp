@@ -138,9 +138,8 @@ void Piece::setLegalMoves() {
          if (i ==0 && j ==0) {
             continue;
          }
-         std::string x{ pos[0] };
-         std::string y{ pos[1] };
-         std::string temp{ x+y };
+         string temp{ pos[0] };
+         temp += pos[1];
          temp[0] += directionX[i];
          temp[1] += directionY[j];
 

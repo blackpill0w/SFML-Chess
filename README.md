@@ -1,2 +1,2 @@
 # SFML-Chess
-Chess in SFML
+Chess in SFML v2.6 (C++14)

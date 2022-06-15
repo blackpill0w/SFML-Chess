@@ -5,8 +5,6 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
-#include <variant>
-#include <array>
 
 #include "pieces.hpp"
 
@@ -18,16 +16,16 @@ using std::vector;
 using std::array;
 using std::find;
 
-using MoveRepresentation = array< std::variant<unsigned, bool, string>, 8 >;
 
-// Enum to easily access elements in moveList class member
-enum : unsigned int {
-   moveListMovingPieceIndex = 0u,
-   moveListOldPos, moveListNewPos,
-   moveListPieceTakenIndex,
-   moveListIsEnPassant, moveListIsCastle,
-   moveListPieceHasMovedChanged,
-   moveListIsPromotion
+struct MoveData {
+  string oldPos{};
+  string newPos{};
+  unsigned movingPieceIndex{ 65u };
+  unsigned takenPieceIndex{ 65u };
+  bool isMoveEnPassant{ false };
+  bool isMoveCastle{ false };
+  bool pieceHasMovedChanged{ false };
+  bool isPromotion{ false };
 };
 
 //**
@@ -68,12 +66,11 @@ protected:
    unsigned bKingIndex;
    //********************************************
    //**
-   //** A vector of arrays (8 elements, see the enum above)
-   //** containing variants (unsinged, bool, string).
-   //** It is used to save moves and to undo them.
+   //** A vector of struct (see definition above)
+   //** It is used to save data about moves to undo them.
    //**
    //********************************************
-   vector< MoveRepresentation > moveList;
+   vector< MoveData > moveList;
 public:
    //********************************************
    //**
@@ -176,7 +173,7 @@ protected:
    //** Check if the move made was a capture.
    //**
    //********************************************
-   void checkTaking(const unsigned &movingPieceIndex, const string &from, const string &to, MoveRepresentation &move);
+   void checkTaking(const unsigned &movingPieceIndex, const string &from, const string &to, MoveData &move);
 
    //********************************************
    //**
@@ -191,7 +188,7 @@ protected:
    //** Check if the move made was a pawn promotion.
    //**
    //********************************************
-   void checkPromoting(const unsigned &movingPieceIndex, const char &pieceToPromoteTo, MoveRepresentation &move);
+   void checkPromoting(const unsigned &movingPieceIndex, const char &pieceToPromoteTo, MoveData &move);
 
    //********************************************
    //**
@@ -234,17 +231,10 @@ protected:
 
    //********************************************
    //**
-   //** Handle checks of pawns.
+   //** Handle checks of pawns and knights.
    //**
    //********************************************
-   void handlePawnCheck();
-
-   //********************************************
-   //**
-   //** Handle checks of knights.
-   //**
-   //********************************************
-   void handleKnightCheck();
+   void handlePawnKnightCheck();
 };
 
 #endif

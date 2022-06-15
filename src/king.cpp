@@ -69,9 +69,9 @@ void King::setLegalMoves() {
 
    for (unsigned i=0; i < 3; i++) {
       for (unsigned j=0; j < 3; j++) {
-         std::string x{ pos[0] };
-         std::string y{ pos[1] };
-         std::string temp{ x+y };
+         string temp{ pos[0] };
+         temp += pos[1];
+
          if (i ==0 && j ==0) {
             continue;
          }

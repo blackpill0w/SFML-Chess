@@ -20,6 +20,7 @@ void playGame(const string &fenStr) {
    );
 
    Board board(fenStr);
+   board.update();
 
    // Load textures (12 for 6 pieces & 2 colors)
    vector< sf::Texture > textures(12, sf::Texture());
@@ -91,7 +92,6 @@ void playGame(const string &fenStr) {
          }
       }
       draw(sprites, spritePressedIndex);
-      board.update();
 
             /****************************************/
 
@@ -146,11 +146,9 @@ void makeMove(
 ) {
    // Tell the board to move (the moving piece is deduced from the variable 'from')
    board.move(from, to, pieceToPromoteTo);
-   // // Sprite might need
-   // sprites[spritePressedIndex]->move( sf::Vector2f(-200, -200) );
 
    // Move the sprite to the new position, if the move isn't valid the piece (from Board) won't
-   // move, meaning the sprite goes back to its initial position.
+   // move, meaning the sprite goes back to its initial position, so, no need for checking.
    sprites[spritePressedIndex]->move( utils::strToVectorf(board.pieces[piecePressedIndex]->pos) );
    spritePressedIndex = utils::invalidIndex;
    for (auto& sprite: sprites) {

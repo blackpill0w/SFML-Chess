@@ -15,11 +15,12 @@ void Knight::setLegalMoves() {
       {2, -1}, {-2, -1}
    };
    for (auto& directions: movesDirections) {
-      string x{ pos[0] };
-      x[0] += directions[0];
-      string y{ pos[1] };
-      y[0] += directions[1];
-      string temp{ x+y };
+
+      string temp{ pos[0] };
+      temp += pos[1];
+      temp[0] += directions[0];
+      temp[1] += directions[1];
+
       PieceColor occupyingColor{ isPosOccupied(temp) };
       if (occupyingColor != color) {
          legalMoves.push_back(temp);

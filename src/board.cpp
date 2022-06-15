@@ -7,6 +7,8 @@ Board::Board( const string &fenStr ) : pieces{}, turn{ WHITE }, wKingIndex{ 0u }
       pieces[wKingIndex]->setRooksIndex();
       pieces[bKingIndex]->setRooksIndex();
    }
+   // Calculate pieces' moves
+   this->update();
 }
 
 Board::Board(const Board &other)
@@ -177,7 +179,7 @@ unsigned Board::checkIfMoveWasEnPassant(const unsigned &movingPieceIndex, const 
    return pieceToBeRemoveIndex;
 }
 
-void Board::checkTaking(const unsigned &movingPieceIndex, const string &from, const string &to, MoveRepresentation &move) {
+void Board::checkTaking(const unsigned &movingPieceIndex, const string &from, const string &to, MoveData &move) {
    unsigned pieceToBeRemoveIndex{ 65u };
    bool isEnPassant{ false };
    pieceToBeRemoveIndex = getIndexOfPieceAt(pieces[movingPieceIndex]->pos, pieces[movingPieceIndex]->color);
@@ -189,14 +191,14 @@ void Board::checkTaking(const unsigned &movingPieceIndex, const string &from, co
    }
    if (pieceToBeRemoveIndex != 65u) {
       removePiece(pieceToBeRemoveIndex);
-      move[moveListPieceTakenIndex] = pieceToBeRemoveIndex;
+      move.takenPieceIndex = pieceToBeRemoveIndex;
       if (isEnPassant) {
-         move[moveListIsEnPassant] = true;
+         move.isMoveEnPassant = true;
       }
    }
 }
 
-void Board::checkPromoting(const unsigned &movingPieceIndex, const char &pieceToPromoteTo, MoveRepresentation &move) {
+void Board::checkPromoting(const unsigned &movingPieceIndex, const char &pieceToPromoteTo, MoveData &move) {
    // What's happening here is basically
    if (pieceToPromoteTo != 0 && tolower(pieces[movingPieceIndex]->type) == 'p') {
       if (pieces[movingPieceIndex]->pos[1] == '1' || pieces[movingPieceIndex]->pos[1] == '8') {
@@ -220,7 +222,7 @@ void Board::checkPromoting(const unsigned &movingPieceIndex, const char &pieceTo
                break;
          }
          pieces[movingPieceIndex].reset( newPiece );
-         move[moveListIsPromotion] = true;
+         move.isPromotion = true;
       }
    }
 }
@@ -235,21 +237,16 @@ bool Board::move(const string &from, const string &to, const char &pieceToPromot
    }
    if( pieces[movingPieceIndex]->color == turn && pieces[movingPieceIndex]->isValidMove(to) ) {
       // To save the move
-      MoveRepresentation move;
-      move[moveListMovingPieceIndex] = movingPieceIndex;
-      move[moveListOldPos] = from;
-      move[moveListNewPos] = to;
-      move[moveListIsCastle] = false;
-      move[moveListIsEnPassant] = false;
-      move[moveListPieceTakenIndex] = 65u;
-      move[moveListPieceHasMovedChanged] = false;
-      move[moveListIsPromotion] = false;
+      MoveData move;
+      move.movingPieceIndex = movingPieceIndex;
+      move.oldPos = from;
+      move.newPos = to;
 
       // Moved successfully
       moveSuccess = true;
       if (!pieces[movingPieceIndex]->hasMoved) {
          pieces[movingPieceIndex]->hasMoved = true;
-         move[moveListPieceHasMovedChanged] = true;
+         move.pieceHasMovedChanged = true;
       }
       changeTurn();
       //** If the move is not castle, else, everything is done
@@ -266,7 +263,7 @@ bool Board::move(const string &from, const string &to, const char &pieceToPromot
       }
       else {
          handleCastling(movingPieceIndex, from, to);
-         move[moveListIsCastle] = true;
+         move.isMoveCastle = true;
       }
       // Disable en passant
       checkDisableEnPassant();
@@ -275,6 +272,10 @@ bool Board::move(const string &from, const string &to, const char &pieceToPromot
       checkPromoting(movingPieceIndex, pieceToPromoteTo, move);
 
       moveList.push_back(move);
+   }
+   if (moveSuccess) {
+      // Recalculate pieces' moves
+      update();
    }
    return moveSuccess;
 }
@@ -293,63 +294,55 @@ void Board::update() {
 
 void Board::undoLastMove() {
    if (!moveList.empty()) {
-      unsigned lastMoveIndex{ static_cast< unsigned >(moveList.size()) - 1u };
-      unsigned movingPieceIndex{ std::get<unsigned>( moveList[lastMoveIndex][moveListMovingPieceIndex] ) };
-      // Put piece in old position
-      string oldPos{ std::get< string >( moveList[lastMoveIndex][moveListOldPos] ) };
-      string newPos{ std::get< string >( moveList[lastMoveIndex][moveListNewPos] ) };
-      bool isPromotion{ std::get< bool >( moveList[lastMoveIndex][moveListIsPromotion] ) };
+      MoveData lastMove = { moveList[moveList.size() - 1u] };
+      // Type of pawn if move was a promotion
       char type{ 'P' };
-      // Handle taken pieces
-      unsigned takenPieceIndex{ std::get<unsigned>( moveList[lastMoveIndex][moveListPieceTakenIndex] ) };
-      if (takenPieceIndex != 65u) {
-         pieces[takenPieceIndex]->alive = true;
+      if (lastMove.takenPieceIndex != 65u) {
+         pieces[lastMove.takenPieceIndex]->alive = true;
       }
-      // Type of pawn to if move was a promotion
-      if (islower(pieces[movingPieceIndex]->type)) {
+      if (islower(pieces[lastMove.movingPieceIndex]->type)) {
          type = 'p';
       }
 
-      if (isPromotion) {
-         pieces[movingPieceIndex].reset(new Pawn(&pieces, &turn, type, oldPos));
+      if (lastMove.isPromotion) {
+         pieces[lastMove.movingPieceIndex].reset(new Pawn(&pieces, &turn, type, lastMove.oldPos));
       }
       // If move was not a promotion
       else {
-         pieces[movingPieceIndex]->pos = oldPos;
-         // Check if the class member 'hasMove' changed
-         bool hasMovedChanged{ std::get< bool >( moveList[lastMoveIndex][moveListPieceHasMovedChanged] ) };
-         if (hasMovedChanged) {
-            pieces[movingPieceIndex]->hasMoved = false;
+         pieces[lastMove.movingPieceIndex]->pos = lastMove.oldPos;
+         // Check if the class member 'hasMoved' changed
+         if (lastMove.pieceHasMovedChanged) {
+            pieces[lastMove.movingPieceIndex]->hasMoved = false;
          }
          // Handle castling
-         bool isCastle{ std::get< bool >( moveList[lastMoveIndex][moveListIsCastle] ) };
-         if (isCastle) {
+         if (lastMove.isMoveCastle) {
             unsigned rookIndex{ 0u };
             string oldRookPos{ "XY" };
-            oldRookPos[1] = oldPos[1];
+            oldRookPos[1] = lastMove.oldPos[1];
             // Short castle
-            if (newPos[0] == 'g') {
-               rookIndex = pieces[movingPieceIndex]->shortCastleRookIndex;
+            if (lastMove.newPos[0] == 'g') {
+               rookIndex = pieces[lastMove.movingPieceIndex]->shortCastleRookIndex;
                oldRookPos[0] = 'h';
             }
             // Long castle
             else {
-               rookIndex = pieces[movingPieceIndex]->longCastleRookIndex;
+               rookIndex = pieces[lastMove.movingPieceIndex]->longCastleRookIndex;
                oldRookPos[0] = 'a';
             }
             pieces[rookIndex]->hasMoved = false;
             pieces[rookIndex]->pos = oldRookPos;
          }
-         bool isEnPassant{ std::get< bool >( moveList[lastMoveIndex][moveListIsEnPassant] ) };
-         if (isEnPassant) {
+         if (lastMove.isMoveEnPassant) {
             // We already brought it back to the board
-            pieces[takenPieceIndex]->enPassant = true;
+            pieces[lastMove.takenPieceIndex]->enPassant = true;
          }
       }
 
       moveList.pop_back();
       changeTurn();
    }
+   // Recalculate possible moves
+   update();
 }
 
 void Board::removeMovesIfNotInVector(const unsigned &pieceIndex, const vector< string > &moves) {
@@ -366,9 +359,8 @@ void Board::removeMovesIfNotInVector(const unsigned &pieceIndex, const vector< s
 
 vector< string > Board::getAllSquaresInBetween(string &from, string &to, const int direction[2]) {
    vector< string > moves{};
-   string x{ from[0] };
-   string y{ from[1] };
-   string temp{ x+y };
+   string temp{ from[0] };
+   temp += from[1];
    while (temp != to) {
       temp[0] += direction[0];
       temp[1] += direction[1];
@@ -405,7 +397,7 @@ void Board::handlePins() {
       bool checkingForPinnedPiece{ true };
       unsigned pinnedPieceIndex{ 65u };
 
-      while (temp[0] != 'h'+1 && temp[0] != 'a'-1 && temp[1] != '0' && temp[1] != '9') {
+      while (temp[0] != ('h'+1) && temp[0] != ('a'-1) && temp[1] != '0' && temp[1] != '9') {
          unsigned pieceIndex = getIndexOfPieceAt(temp);
 
          if (pieceIndex != 65u) {
@@ -420,7 +412,7 @@ void Board::handlePins() {
                   // The first 4 directions are horizontal and vertical
                   // The other 4 are diagonals
                   if (
-                     tolower(pieces[pieceIndex]->type == 'q')
+                     tolower(pieces[pieceIndex]->type) == 'q'
                      || (i < 4 && tolower(pieces[pieceIndex]->type) == 'r')
                      || (i >= 4 && tolower(pieces[pieceIndex]->type) == 'b' )
                   ) {
@@ -443,7 +435,7 @@ void Board::handlePins() {
 
 void Board::handleChecks() {
    handleSlidingPiecesChecks();
-   handlePawnCheck();
+   handlePawnKnightCheck();
 }
 
 void Board::handleSlidingPiecesChecks() {
@@ -467,14 +459,14 @@ void Board::handleSlidingPiecesChecks() {
       temp[0] += directions[i][0];
       temp[1] += directions[i][1];
 
-      while (temp[0] != 'h'+1 && temp[0] != 'a'-1 && temp[1] != '0' && temp[1] != '9') {
+      while (temp[0] != ('h'+1) && temp[0] != ('a'-1) && temp[1] != '0' && temp[1] != '9') {
          unsigned pieceIndex = getIndexOfPieceAt(temp);
          if (pieceIndex != 65u) {
             if (pieces[pieceIndex]->color != pieces[kingIndex]->color) {
                // The first 4 directions are horizontal and vertical
                // The other 4 are diagonals
                if (
-                  tolower(pieces[pieceIndex]->type == 'q')
+                  tolower(pieces[pieceIndex]->type) == 'q'
                   || (i < 4 && tolower(pieces[pieceIndex]->type) == 'r')
                   || (i >= 4 && tolower(pieces[pieceIndex]->type) == 'b')
                ) {
@@ -499,6 +491,7 @@ void Board::handleSlidingPiecesChecks() {
                   for (unsigned i=0u; i < pieces[kingIndex]->legalMoves.size(); i++) {
                      if (pieces[kingIndex]->legalMoves[i] == temp2) {
                         pieces[kingIndex]->legalMoves.erase(pieces[kingIndex]->legalMoves.begin() + i);
+                        break;
                      }
                   }
 
@@ -513,49 +506,24 @@ void Board::handleSlidingPiecesChecks() {
    }
 }
 
-void Board::handlePawnCheck() {
+void Board::handlePawnKnightCheck() {
+   vector< string > attackingPiecesPos{};
    unsigned kingIndex{ turn == WHITE ? wKingIndex : bKingIndex };
-   string pawnPos1{ pieces[kingIndex]->pos };
-   string pawnPos2{ pieces[kingIndex]->pos };
-   pawnPos1[0]--;
-   pawnPos2[0]++;
-   pawnPos1[1] += pieces[kingIndex]->pawnMovementDirection;
-   pawnPos2[1] += pieces[kingIndex]->pawnMovementDirection;
-   unsigned pawnIndices[2] = { getIndexOfPieceAt(pawnPos1), getIndexOfPieceAt(pawnPos2) };
-   for (auto& pawnI: pawnIndices) {
-      if (pawnI != 65u) {
-         if (tolower(pieces[pawnI]->type) == 'p' && pieces[pawnI]->color != pieces[kingIndex]->color) {
-            for (unsigned i=0u; i < pieces.size(); i++) {
-               if (pieces[i]->alive && pieces[i]->color == pieces[kingIndex]->color && pieces[kingIndex]->pos != pieces[i]->pos) {
-                  removeMovesIfNotInVector(i, { pieces[pawnI]->pos });
-               }
+   for (auto& attackingPiece: pieces) {
+      if (attackingPiece->color != pieces[kingIndex]->color && attackingPiece->alive) {
+         if ( tolower(attackingPiece->type) == 'p' || tolower(attackingPiece->type) == 'n' ) {
+            if (find(attackingPiece->legalMoves.begin(), attackingPiece->legalMoves.end(), pieces[kingIndex]->pos) != attackingPiece->legalMoves.end()) {
+               attackingPiecesPos.emplace_back(attackingPiece->pos);
             }
+         }
+      }
+   }
+   if (! attackingPiecesPos.empty()) {
+      for (unsigned i=0u; i < pieces.size(); i++) {
+         if (pieces[i]->color == pieces[kingIndex]->color && pieces[i]->pos != pieces[kingIndex]->pos) {
+            removeMovesIfNotInVector(i, attackingPiecesPos);
          }
       }
    }
 }
 
-void Board::handleKnightCheck() {
-   unsigned kingIndex{ turn == WHITE ? wKingIndex : bKingIndex };
-   constexpr int knightPossibleDirections[8][2] = {
-      {1, 2}, {-1, 2},
-      {1, -2}, {-1, -2},
-      {2, 1}, {-2, 1},
-      {2, -1}, {-2, -1}
-   };
-   for (auto& direction: knightPossibleDirections) {
-      string temp{ pieces[kingIndex]->pos };
-      temp[0] += direction[0];
-      temp[1] += direction[1];
-      unsigned knightI{ getIndexOfPieceAt(temp) };
-      if (knightI != 65u) {
-         if (tolower(pieces[knightI]->type) == 'n' && pieces[knightI]->color != pieces[kingIndex]->color) {
-            for (unsigned i=0u; i < pieces.size(); i++) {
-               if (pieces[i]->alive && pieces[i]->color == pieces[kingIndex]->color && pieces[kingIndex]->pos != pieces[i]->pos) {
-                  removeMovesIfNotInVector(i, { pieces[knightI]->pos });
-               }
-            }
-         }
-      }
-   }
-}

@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Weffc++ -Wextra -Wsign-conversion -g
+CXXFLAGS = -std=c++14 -Wall -Weffc++ -Wextra -Wsign-conversion -g
 LDFLAGS = -l sfml-window -l sfml-system -l sfml-graphics
 
 SRC=src
