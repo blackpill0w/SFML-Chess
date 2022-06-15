@@ -49,8 +49,10 @@ void playGame(const string &fenStr) {
          }
          else if (event.type == sf::Event::MouseButtonPressed) {
             spritePressedIndex = utils::getSpriteIndexAt(sprites, mousePos);
-            piecePressedIndex = sprites[spritePressedIndex]->pieceIndex;
-            from = utils::posToStr(mousePos);
+	    if (spritePressedIndex != utils::invalidIndex) {
+               piecePressedIndex = sprites[spritePressedIndex]->pieceIndex;
+               from = utils::posToStr(mousePos);
+	    }
          }
          else if (event.type == sf::Event::MouseButtonReleased) {
             mouseReleased = true;
