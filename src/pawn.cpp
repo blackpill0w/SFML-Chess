@@ -86,7 +86,7 @@ void Pawn::setLegalMoves() {
    if (!hasMoved) {
       string twoSteps{ inFront };
       twoSteps[1] += pawnMovementDirection;
-      if (!isPosOccupied(twoSteps)) {
+      if (isPosOccupied(twoSteps) == NONE ) {
          legalMoves.push_back(twoSteps);
       }
    }

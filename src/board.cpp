@@ -408,6 +408,9 @@ void Board::handlePins() {
                   pinnedPieceIndex = pieceIndex;
                   checkingForPinnedPiece = false;
                }
+               else {
+                  break;
+               }
             }
             else { // Looking for the pinning piece
                if (pieces[pieceIndex]->color != pieces[kingIndex]->color) {
@@ -416,7 +419,7 @@ void Board::handlePins() {
                   if (
                      tolower(pieces[pieceIndex]->type) == 'q'
                      || (i < 4 && tolower(pieces[pieceIndex]->type) == 'r')
-                     || (i >= 4 && tolower(pieces[pieceIndex]->type) == 'b' )
+                     || (i >= 4 && tolower(pieces[pieceIndex]->type) == 'b')
                   ) {
                      vector<string> legalSquares{
                         getAllSquaresInBetween(pieces[kingIndex]->pos, pieces[pieceIndex]->pos, directions[i])
