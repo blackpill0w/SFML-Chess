@@ -280,7 +280,7 @@ char getPieceToPromoteTo(
 int randomNumber(const int &from, const int &to) {
    std::random_device dev;
    std::mt19937 rng(dev());
-   std::uniform_int_distribution<std::mt19937::result_type> randomNum(from, to);
+   std::uniform_int_distribution<std::mt19937::result_type> randomNum(static_cast<unsigned>(from), static_cast<unsigned>(to));
    return randomNum(rng);
 }
 
@@ -295,12 +295,12 @@ void pickRandomMove(Board &board, string &from, string &to) {
    // Picking a random piece
    unsigned pieceIndex{ 0u };
    do {
-      from = piecesToMove[ randomNumber(0, piecesToMove.size() - 1) ];
+      from = piecesToMove[ static_cast<unsigned>(randomNumber(0, piecesToMove.size() - 1)) ];
       pieceIndex = board.getIndexOfPieceAt(from);
    } while (board.pieces[pieceIndex]->legalMoves.size() == 0u);
 
    // Picking random move
-   to = board.pieces[pieceIndex]->legalMoves[randomNumber(0, board.pieces[pieceIndex]->legalMoves.size() - 1)];
+   to = board.pieces[pieceIndex]->legalMoves[ static_cast<unsigned>(randomNumber(0, board.pieces[pieceIndex]->legalMoves.size() - 1))];
 }
 
 void playRandomMove(Board &board, string &from, string &to, vector<unique_ptr<PieceSprite>> &sprites) {
