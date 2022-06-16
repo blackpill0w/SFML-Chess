@@ -1,6 +1,8 @@
 #include "board.hpp"
 
-Board::Board( const string &fenStr ) : pieces{}, turn{ WHITE }, wKingIndex{ 0u }, bKingIndex{ 0u }, moveList{}
+Board::Board( const string &fenStr ) :
+   pieces{}, turn{ WHITE },
+   wKingIndex{ 0u }, bKingIndex{ 0u }, moveList{}, possibleMoves{ 0u }
 {
    if (fenStr != "") {
       loadFEN(fenStr);
@@ -12,7 +14,8 @@ Board::Board( const string &fenStr ) : pieces{}, turn{ WHITE }, wKingIndex{ 0u }
 }
 
 Board::Board(const Board &other)
-: pieces{}, turn{ other.turn }, wKingIndex{ other.wKingIndex }, bKingIndex{ other.bKingIndex }, moveList{}
+: pieces{}, turn{ other.turn }, wKingIndex{ other.wKingIndex },
+  bKingIndex{ other.bKingIndex }, moveList{ other.moveList }, possibleMoves{ other.possibleMoves }
 {
    // Copy the pieces
    for (unsigned i=0; i < other.pieces.size(); i++) {
@@ -35,8 +38,6 @@ Board::Board(const Board &other)
          pieces.emplace_back( make_unique<Pawn>( Pawn(&pieces, &turn, other.pieces[i]->type, other.pieces[i]->pos) ) );
       }
    }
-   // TODO:
-   // Copy move history
 }
 
 void Board::loadFEN(const string &fenStr) {
@@ -290,6 +291,7 @@ void Board::update() {
    pieces[bKingIndex]->update();
    handlePins();
    handleChecks();
+   calculatePossibleMoves();
 }
 
 void Board::undoLastMove() {
@@ -527,3 +529,15 @@ void Board::handlePawnKnightCheck() {
    }
 }
 
+void Board::calculatePossibleMoves() {
+   possibleMoves = 0u;
+   for (auto& piece: pieces) {
+      if (piece->color == turn && piece->alive) {
+         possibleMoves += piece->legalMoves.size();
+      }
+   }
+}
+
+unsigned Board::getNumberOfPossibleMoves() {
+   return possibleMoves;
+}

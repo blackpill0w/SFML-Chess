@@ -9,8 +9,27 @@ public:
    void setLegalMoves() override;
    void update() override;
 protected:
+   //********************************************
+   //**
+   //** Update the attacking positions of a pawn.
+   //**
+   //********************************************
    void updateAttackingPositions();
+
+   //********************************************
+   //**
+   //** Check if en passant is possible.
+   //**
+   //********************************************
    void checkEnPassant();
+
+   //********************************************
+   //**
+   //** Check if en passant results in a check,
+   //** or rather, in taking the king.
+   //**
+   //********************************************
+   bool isEnPassantResultsInCheck();
 };
 
 #endif

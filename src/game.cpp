@@ -20,7 +20,7 @@ void playGame(const string &fenStr) {
    );
 
    Board board(fenStr);
-   board.update();
+   cout << "Possible moves: " << board.getNumberOfPossibleMoves() << '\n';
 
    // Load textures (12 for 6 pieces & 2 colors)
    vector< sf::Texture > textures(12, sf::Texture());
@@ -89,6 +89,7 @@ void playGame(const string &fenStr) {
                checkPromotion(&window, sprites, boardSprite, spritePressedIndex, pieceToPromoteTo, to);
             }
             makeMove(board, from, to, pieceToPromoteTo, piecePressedIndex, sprites, spritePressedIndex);
+            cout << "Possible moves: " << board.getNumberOfPossibleMoves() << '\n';
          }
       }
       draw(sprites, spritePressedIndex);

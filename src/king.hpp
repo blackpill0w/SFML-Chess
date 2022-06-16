@@ -11,6 +11,11 @@ public:
    void shortCastle() override;
    void longCastle() override;
 protected:
+   //********************************************
+   //**
+   //** Check if castle is possible.
+   //**
+   //********************************************
    void checkCastle();
 };
 

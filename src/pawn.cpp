@@ -5,17 +5,53 @@ Pawn::Pawn(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const ch
 {
 }
 
+bool Pawn::isEnPassantResultsInCheck() {
+   //********************************************
+   //**
+   //** Sometimes en passant results in the king
+   //** being attacked.
+   //** ex: Q - - P p - k -
+   //** If en passant happens, both pawns move
+   //** and the queen is able to take the king.
+   //**
+   //********************************************
+
+   constexpr int directions[2] = {1, -1};
+   bool kingToTheSide{ false };
+   bool attackingPieceToTheSide{ false };
+   for (auto& direction: directions) {
+      string temp{ pos };
+      temp[0] += direction;
+      while (temp[0] != ('h'+1) && temp[0] != ('a'-1)) {
+         for (auto& piece: *pieces) {
+            if (piece->pos == temp) {
+               if (piece->color == color && tolower(piece->type) == 'k') {
+                  kingToTheSide = true;
+                  break;
+               }
+               else if (piece->color != color && (tolower(piece->type) == 'q' || tolower(piece->type) == 'r') && piece->alive) {
+                  attackingPieceToTheSide = true;
+                  break;
+               }
+            }
+         }
+         temp[0] += direction;
+      }
+   }
+   if (kingToTheSide && attackingPieceToTheSide) {
+      return true;
+   }
+   return false;
+}
+
 void Pawn::checkEnPassant() {
-   string movingDirection{ pos[1] };
-   movingDirection[0] += pawnMovementDirection;
-
-   string right{ pos[0] };
-   string left{ pos[0] };
-   right[0]++;
-   left[0]--;
-
-   string EPpos1{ right + pos[1] };
-   string EPpos2{ left + pos[1] };
+   void undoLastMove();
+   string EPpos1{ pos };
+   string EPpos2{ pos };
+   // Right
+   EPpos1[0] += 1;
+   // Left
+   EPpos2[0] += (-1);
 
    for (auto& piece: *pieces) {
       if (piece->color != color && tolower(piece->type) == 'p') {
@@ -23,11 +59,14 @@ void Pawn::checkEnPassant() {
             if (piece->pos == EPpos1) {
                // AtattackingPositions are positions where the pawn is attacking a piece,
                // which is the same as en passant
-               legalMoves.push_back(attackingPositions[0]);
+               if (!isEnPassantResultsInCheck()) {
+                  legalMoves.push_back(attackingPositions[0]);
+               }
             }
             else if (piece->pos == EPpos2) {
-               EPpos2 = left + movingDirection;
-               legalMoves.push_back(attackingPositions[1]);
+               if (!isEnPassantResultsInCheck()) {
+                  legalMoves.push_back(attackingPositions[1]);
+               }
             }
          }
       }
@@ -35,36 +74,21 @@ void Pawn::checkEnPassant() {
 }
 
 void Pawn::setLegalMoves() {
-   //**********************
-   //**
-   //**  TODO: I'm not sure I like this
-   //**
-   //**********************
    legalMoves.clear();
 
    checkEnPassant();
 
-   string x{ pos[0] };
-   string y{ pos[1] };
-   if (color == WHITE) {
-      y[0]++;
-   }
-   else {
-      y[0]--;
-   }
-   string inFront{ x+y };
+   string inFront{ pos[0] };
+   inFront += (pos[1] + pawnMovementDirection);
    if (!isPosOccupied(inFront)) {
       legalMoves.push_back(inFront);
    }
-   if (color == WHITE) {
-      y[0]++;
-   }
-   else {
-      y[0]--;
-   }
-   string twoSteps{ x+y };
-   if (!hasMoved && !isPosOccupied(twoSteps)) {
-      legalMoves.push_back(twoSteps);
+   if (!hasMoved) {
+      string twoSteps{ inFront };
+      twoSteps[1] += pawnMovementDirection;
+      if (!isPosOccupied(twoSteps)) {
+         legalMoves.push_back(twoSteps);
+      }
    }
    for (auto& position: attackingPositions){
       PieceColor occupyingPiece{ isPosOccupied(position) };
@@ -75,19 +99,12 @@ void Pawn::setLegalMoves() {
 }
 
 void Pawn::updateAttackingPositions() {
-   int direction{ 1 };
-   if (color == BLACK) {
-      direction = -1;
-   }
-   string x{ pos[0] };
-   string y{ pos[1] };
-
-   y[0] += direction;
-   x[0]++;
-   string right{ x+y };
-   // 2 because we already incremented x
-   x[0] -= 2;
-   string left{ x+y };
+   string right{ pos };
+   right[0] += 1;
+   right[1] += pawnMovementDirection;
+   string left{ pos };
+   left[0] += (-1);
+   left[1] += pawnMovementDirection;
    attackingPositions[0] = right;
    attackingPositions[1] = left;
 }

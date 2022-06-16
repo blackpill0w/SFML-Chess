@@ -71,6 +71,12 @@ protected:
    //**
    //********************************************
    vector< MoveData > moveList;
+   //********************************************
+   //**
+   //** The number of possible moves.
+   //**
+   //********************************************
+   unsigned possibleMoves;
 public:
    //********************************************
    //**
@@ -124,6 +130,13 @@ public:
    //**
    //********************************************
    void undoLastMove();
+
+   //********************************************
+   //**
+   //** Get the number of possible moves.
+   //**
+   //********************************************
+   unsigned getNumberOfPossibleMoves();
 
 protected:
    //********************************************
@@ -223,8 +236,8 @@ protected:
 
    //********************************************
    //**
-   //** Handle checks of sliding pieces;
-   //** queens, rooks and bishops.
+   //** Handle checks of sliding pieces
+   //** (queens, rooks and bishops).
    //**
    //********************************************
    void handleSlidingPiecesChecks();
@@ -235,6 +248,13 @@ protected:
    //**
    //********************************************
    void handlePawnKnightCheck();
+
+   //********************************************
+   //**
+   //** Calculate the number os possible moves.
+   //**
+   //********************************************
+   void calculatePossibleMoves();
 };
 
 #endif
