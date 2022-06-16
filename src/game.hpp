@@ -1,8 +1,23 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+
 #include "utils.hpp"
-#include "board.hpp"
+#include "Chess/board.hpp"
+
+#include <string>
+#include <vector>
+#include <memory>
+#include <random>
+#include <iostream>
+
+using std::cout;
+using std::string;
+using std::vector;
+using std::unique_ptr;
+using std::make_unique;
 
 void playGame(const string &fenStr = "");
 
@@ -45,5 +60,11 @@ char getPieceToPromoteTo(
       vector< unique_ptr<PieceSprite> > *sprites,
       const unsigned &pieceToBePromotedIndex
 );
+
+int randomNumber(const int &from, const int &to);
+
+void pickRandomMove(Board &board, string &from, string &to);
+
+void playRandomMove(Board &board, string &from, string &to, vector<unique_ptr<PieceSprite>> &sprites);
 
 #endif

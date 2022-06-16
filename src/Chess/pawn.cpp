@@ -82,12 +82,13 @@ void Pawn::setLegalMoves() {
    inFront += (pos[1] + pawnMovementDirection);
    if (!isPosOccupied(inFront)) {
       legalMoves.push_back(inFront);
-   }
-   if (!hasMoved) {
-      string twoSteps{ inFront };
-      twoSteps[1] += pawnMovementDirection;
-      if (isPosOccupied(twoSteps) == NONE ) {
-         legalMoves.push_back(twoSteps);
+      // Two squares forward
+      if (!hasMoved) {
+         string twoSteps{ inFront };
+         twoSteps[1] += pawnMovementDirection;
+         if (isPosOccupied(twoSteps) == NONE ) {
+            legalMoves.push_back(twoSteps);
+         }
       }
    }
    for (auto& position: attackingPositions){

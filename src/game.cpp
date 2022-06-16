@@ -11,7 +11,7 @@ void playGame(const string &fenStr) {
    window.setFramerateLimit(utils::fps);
 
    // Board texture
-   sf::Texture boardTexture;
+   sf::Texture boardTexture{};
    boardTexture.loadFromFile(utils::boardTexture);
    sf::Sprite boardSprite(boardTexture);
    boardSprite.setScale(
@@ -27,19 +27,19 @@ void playGame(const string &fenStr) {
    utils::loadTextures(textures);
 
    // Sprites of the pieces
-   vector< unique_ptr<PieceSprite> > sprites;
+   vector< unique_ptr<PieceSprite> > sprites{};
    loadSprites(sprites, textures, board, window);
 
    // Helpers
-   sf::Vector2f mousePos;
+   sf::Vector2f mousePos{};
    bool mouseReleased{ false };
    //** This keeps track of the sprite pressed (being moved)
    unsigned int spritePressedIndex{ utils::invalidIndex };
    //** And this is the corresponding piece (from Board)
    unsigned piecePressedIndex{ utils::invalidIndex };
    // From and to where the sprite has moved
-   string from;
-   string to;
+   string from{};
+   string to{};
    char pieceToPromoteTo{ 0 };
 
    while (window.isOpen()) {
@@ -50,15 +50,14 @@ void playGame(const string &fenStr) {
          }
          else if (event.type == sf::Event::MouseButtonPressed) {
             spritePressedIndex = utils::getSpriteIndexAt(sprites, mousePos);
-	    if (spritePressedIndex != utils::invalidIndex) {
+            if (spritePressedIndex != utils::invalidIndex) {
                piecePressedIndex = sprites[spritePressedIndex]->pieceIndex;
                from = utils::posToStr(mousePos);
-	    }
+            }
          }
          else if (event.type == sf::Event::MouseButtonReleased) {
             mouseReleased = true;
          }
-         //** For debugging
          else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::U) {
             board.undoLastMove();
             for (auto& sprite: sprites) {
@@ -90,6 +89,10 @@ void playGame(const string &fenStr) {
             }
             makeMove(board, from, to, pieceToPromoteTo, piecePressedIndex, sprites, spritePressedIndex);
             cout << "Possible moves: " << board.getNumberOfPossibleMoves() << '\n';
+            if (board.turn == BLACK) {
+               playRandomMove(board, from, to, sprites);
+               cout << "Possible moves: " << board.getNumberOfPossibleMoves() << '\n';
+            }
          }
       }
       draw(sprites, spritePressedIndex);
@@ -272,4 +275,38 @@ char getPieceToPromoteTo(
       piece = toupper(piece);
    }
    return piece;
+}
+
+int randomNumber(const int &from, const int &to) {
+   std::random_device dev;
+   std::mt19937 rng(dev());
+   std::uniform_int_distribution<std::mt19937::result_type> randomNum(from, to);
+   return randomNum(rng);
+}
+
+void pickRandomMove(Board &board, string &from, string &to) {
+   vector<string> piecesToMove{};
+   for (auto& piece: board.pieces) {
+      if (piece->color == board.turn && piece->alive) {
+         piecesToMove.emplace_back(piece->pos);
+      }
+   }
+
+   // Picking a random piece
+   unsigned pieceIndex{ 0u };
+   do {
+      from = piecesToMove[ randomNumber(0, piecesToMove.size() - 1) ];
+      pieceIndex = board.getIndexOfPieceAt(from);
+   } while (board.pieces[pieceIndex]->legalMoves.size() == 0u);
+
+   // Picking random move
+   to = board.pieces[pieceIndex]->legalMoves[randomNumber(0, board.pieces[pieceIndex]->legalMoves.size() - 1)];
+}
+
+void playRandomMove(Board &board, string &from, string &to, vector<unique_ptr<PieceSprite>> &sprites) {
+   pickRandomMove(board, from, to);
+   board.move(from, to, 'q');
+   for (auto& sprite: sprites) {
+      sprite->update();
+   }
 }

@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 
-#include "board.hpp"
+#include "Chess/board.hpp"
 #include "utils.hpp"
 
 using std::string;

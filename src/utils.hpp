@@ -7,7 +7,7 @@
 #include <string>
 #include <limits>
 
-#include "board.hpp"
+#include "Chess/board.hpp"
 
 #include "pieceSprite.hpp"
 class PieceSprite;
@@ -18,9 +18,9 @@ using std::unique_ptr;
 
 namespace utils {
 
-   //** Just a helper, nothing special, can be used anywhere
+   //** Just a helper
    extern const unsigned int invalidIndex;
-   //** FPS -_-
+   //** FPS
    extern const unsigned int fps;
 
    //** Length of piece's side

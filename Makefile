@@ -3,6 +3,7 @@ CXXFLAGS = -std=c++14 -Wall -Weffc++ -Wextra -Wsign-conversion -g
 LDFLAGS = -l sfml-window -l sfml-system -l sfml-graphics
 
 SRC=src
+CHESS=Chess
 
 chess: pieceSprite.o utils.o piece.o king.o queen.o rook.o bishop.o knight.o pawn.o board.o game.o main.o
 	${CXX} ${CXXFLAGS} ${LDFLAGS} $^ -o $@
@@ -12,24 +13,24 @@ game.o: ${SRC}/game.cpp ${SRC}/game.hpp
 	${CXX} ${CXXFLAGS} -c ${SRC}/game.cpp
 pieceSprite.o: ${SRC}/pieceSprite.cpp ${SRC}/pieceSprite.hpp
 	${CXX} ${CXXFLAGS} -c ${SRC}/pieceSprite.cpp
-board.o: ${SRC}/board.hpp ${SRC}/board.cpp
-	${CXX} ${CXXFLAGS} -c ${SRC}/board.cpp
-king.o: ${SRC}/king.hpp ${SRC}/king.cpp
-	${CXX} ${CXXFLAGS} -c ${SRC}/king.cpp
-queen.o: ${SRC}/queen.hpp ${SRC}/queen.cpp
-	${CXX} ${CXXFLAGS} -c ${SRC}/queen.cpp
-rook.o: ${SRC}/rook.hpp ${SRC}/rook.cpp
-	${CXX} ${CXXFLAGS} -c ${SRC}/rook.cpp
-bishop.o: ${SRC}/bishop.hpp ${SRC}/bishop.cpp
-	${CXX} ${CXXFLAGS} -c ${SRC}/bishop.cpp
-knight.o: ${SRC}/knight.hpp ${SRC}/knight.cpp
-	${CXX} ${CXXFLAGS} -c ${SRC}/knight.cpp
-pawn.o: ${SRC}/pawn.hpp ${SRC}/pawn.cpp
-	${CXX} ${CXXFLAGS} -c ${SRC}/pawn.cpp
-piece.o: ${SRC}/piece.hpp ${SRC}/piece.cpp
-	${CXX} ${CXXFLAGS} -c ${SRC}/piece.cpp
 utils.o: ${SRC}/utils.hpp ${SRC}/utils.cpp
 	${CXX} ${CXXFLAGS} -c ${SRC}/utils.cpp
+board.o: ${SRC}/${CHESS}/board.hpp ${SRC}/${CHESS}/board.cpp
+	${CXX} ${CXXFLAGS} -c ${SRC}/${CHESS}/board.cpp
+king.o: ${SRC}/${CHESS}/king.hpp ${SRC}/${CHESS}/king.cpp
+	${CXX} ${CXXFLAGS} -c ${SRC}/${CHESS}/king.cpp
+queen.o: ${SRC}/${CHESS}/queen.hpp ${SRC}/${CHESS}/queen.cpp
+	${CXX} ${CXXFLAGS} -c ${SRC}/${CHESS}/queen.cpp
+rook.o: ${SRC}/${CHESS}/rook.hpp ${SRC}/${CHESS}/rook.cpp
+	${CXX} ${CXXFLAGS} -c ${SRC}/${CHESS}/rook.cpp
+bishop.o: ${SRC}/${CHESS}/bishop.hpp ${SRC}/${CHESS}/bishop.cpp
+	${CXX} ${CXXFLAGS} -c ${SRC}/${CHESS}/bishop.cpp
+knight.o: ${SRC}/${CHESS}/knight.hpp ${SRC}/${CHESS}/knight.cpp
+	${CXX} ${CXXFLAGS} -c ${SRC}/${CHESS}/knight.cpp
+pawn.o: ${SRC}/${CHESS}/pawn.hpp ${SRC}/${CHESS}/pawn.cpp
+	${CXX} ${CXXFLAGS} -c ${SRC}/${CHESS}/pawn.cpp
+piece.o: ${SRC}/${CHESS}/piece.hpp ${SRC}/${CHESS}/piece.cpp
+	${CXX} ${CXXFLAGS} -c ${SRC}/${CHESS}/piece.cpp
 
 clean:
 	rm -rf *.o chess
