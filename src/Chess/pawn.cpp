@@ -1,5 +1,8 @@
 #include "pawn.hpp"
 
+namespace Chess
+{
+
 Pawn::Pawn(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos)
 : Piece(pieces, turn, type, pos)
 {
@@ -96,6 +99,13 @@ void Pawn::setLegalMoves() {
       if (occupyingPiece != NONE && occupyingPiece != color) {
          legalMoves.push_back(position);
       }
+      else {
+         for (auto& piece: *pieces) {
+            if (piece->pos == position && piece->alive) {
+               piece->isProtected = true;
+            }
+         }
+      }
    }
 }
 
@@ -114,3 +124,5 @@ void Pawn::update() {
    updateAttackingPositions();
    setLegalMoves();
 }
+
+} // Chess namespace

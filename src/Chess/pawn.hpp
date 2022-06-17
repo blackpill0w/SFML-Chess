@@ -3,6 +3,9 @@
 
 #include "piece.hpp"
 
+namespace Chess
+{
+
 class Pawn : public Piece {
 public:
    Pawn(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
@@ -31,5 +34,7 @@ protected:
    //********************************************
    bool isEnPassantResultsInCheck();
 };
+
+}
 
 #endif

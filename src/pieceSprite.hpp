@@ -27,12 +27,12 @@ public:
    sf::Sprite sprite;
    sf::RenderWindow *window;
    unsigned pieceIndex;
-   Board *board;
+   Chess::Board *board;
    bool alive;
    string pos;
    char pieceType;
 public:
-   PieceSprite(const vector<sf::Texture> *textures, unsigned &pieceIndex, Board *board, sf::RenderWindow *window);
+   PieceSprite(const vector<sf::Texture> *textures, unsigned &pieceIndex, Chess::Board *board, sf::RenderWindow *window);
 
    PieceSprite(const PieceSprite& other);
    PieceSprite operator=(const PieceSprite& other) = delete;

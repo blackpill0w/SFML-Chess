@@ -1,9 +1,12 @@
 #include "piece.hpp"
 
+namespace Chess
+{
+
 Piece::Piece(const Piece& other)
 : type{ other.type }, color{ other.color }, alive{ true }, pos{ other.pos },
-  hasMoved{ other.hasMoved }, legalMoves{ "" }, pieces{ other.pieces }, turn{ other.turn },
-  enPassant{ other.enPassant }, pawnMovementDirection{ other.pawnMovementDirection }
+  hasMoved{ other.hasMoved }, legalMoves{ "" }, pieces{ other.pieces }, turn{ other.turn }, isProtected{ other.isProtected },
+  enPassant{ other.enPassant }, pawnMovementDirection{ other.pawnMovementDirection }, inCheck{ other.inCheck }
 {
    // legalMoves
    legalMoves.clear();
@@ -17,8 +20,8 @@ Piece::Piece(const Piece& other)
 
 Piece::Piece(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos)
 : type{ type }, color{ BLACK }, alive{ true }, pos{ pos }, hasMoved{ false },
-  legalMoves{ "" }, pieces{ pieces }, turn{ turn },
-  enPassant{ false }, pawnMovementDirection{ 1 }
+  legalMoves{ "" }, pieces{ pieces }, turn{ turn }, isProtected{ false },
+  enPassant{ false }, pawnMovementDirection{ 1 }, inCheck{ false }
 {
    if (isupper(type)) {
       this->color = WHITE;
@@ -93,6 +96,9 @@ bool Piece::canPosBeAttacked(const string &position, const PieceColor &color) {
 void Piece::update() {
    setLegalMoves();
    removeMovesOutsideBoard();
+   if (inCheck) {
+      inCheck = false;
+   }
 }
 
 bool Piece::isValidMove(const string &move) {
@@ -153,6 +159,13 @@ void Piece::setLegalMoves() {
                }
             }
             else {
+               // Mark the piece protected
+               for (auto& piece: *pieces) {
+                  if (piece->pos == temp && piece->alive) {
+                     piece->isProtected = true;
+                     break;
+                  }
+               }
                break;
             }
             temp[0] = temp[0] + directionX[i];
@@ -166,3 +179,5 @@ void Piece::setLegalMoves() {
 void Piece::longCastle() {}
 void Piece::shortCastle() {}
 void Piece::setRooksIndex() {}
+
+} // Chess namespace

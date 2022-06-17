@@ -16,8 +16,12 @@ using std::vector;
 using std::array;
 using std::find;
 
+namespace Chess
+{
+enum GameState { MoveFailed, MoveSuccess, CheckMate, Draw};
 
-struct MoveData {
+class MoveData {
+public:
   string oldPos{};
   string newPos{};
   unsigned movingPieceIndex{ 65u };
@@ -26,6 +30,19 @@ struct MoveData {
   bool isMoveCastle{ false };
   bool pieceHasMovedChanged{ false };
   bool isPromotion{ false };
+public:
+bool operator==(const MoveData &other) {
+   return (
+      oldPos == other.oldPos
+      && newPos == other.newPos
+      && movingPieceIndex == other.movingPieceIndex
+      && takenPieceIndex == other.takenPieceIndex
+      && isMoveEnPassant == other.isMoveEnPassant
+      && isMoveCastle == other.isMoveCastle
+      && pieceHasMovedChanged == other.pieceHasMovedChanged
+      && isPromotion == other.isPromotion
+   );
+}
 };
 
 //**
@@ -106,7 +123,7 @@ public:
    //** the piece to be moved is deduced from the 'from' var.
    //**
    //********************************************
-   bool move(const string &from, const string &to, const char &pieceToPromoteTo = 0);
+   GameState move(const string &from, const string &to, const char &pieceToPromoteTo = 0);
 
    //********************************************
    //**
@@ -255,6 +272,15 @@ protected:
    //**
    //********************************************
    void calculatePossibleMoves();
-};
+
+   //********************************************
+   //**
+   //** Checks for draw by repitition.
+   //**
+   //********************************************
+   bool isDrawByRepitition();
+}; // Board class
+
+} // Chess namespace
 
 #endif

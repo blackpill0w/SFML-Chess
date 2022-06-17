@@ -1,5 +1,8 @@
 #include "king.hpp"
 
+namespace Chess
+{
+
 King::King(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos)
 : Piece(pieces, turn, type, pos)
 {
@@ -72,20 +75,34 @@ void King::setLegalMoves() {
          string temp{ pos[0] };
          temp += pos[1];
 
-         if (i ==0 && j ==0) {
+         if (i == 0 && j == 0) {
             continue;
          }
-         temp[0] = temp[0] + directionX[i];
-         temp[1] = temp[1] + directionY[j];
+         temp[0] += directionX[i];
+         temp[1] += directionY[j];
          if (temp[0] != 'h'+1 && temp[0] != 'a'-1 && temp[1] != '0' && temp[1] != '9') {
             PieceColor pieceOccupyingColor{ isPosOccupied(temp) };
             bool canKingBeAttacked{ canPosBeAttacked(temp, color) };
 
             if ( pieceOccupyingColor != color && !canKingBeAttacked) {
-               legalMoves.push_back(temp);
+               // If it's an enemy piece, we should check if it's protected
+               if (pieceOccupyingColor != NONE) {
+                  for (auto& piece: *pieces) {
+                     if (piece->pos == temp && piece->alive) {
+                        if (!piece->isProtected) {
+                           legalMoves.push_back(temp);
+                        }
+                     }
+                  }
+               }
+               else {
+                  legalMoves.push_back(temp);
+               }
             }
          }
       }
    }
    checkCastle();
 }
+
+} // Chess namespace

@@ -19,12 +19,12 @@ using std::vector;
 using std::unique_ptr;
 using std::make_unique;
 
-void playGame(const string &fenStr = "");
+void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuman = true);
 
 void loadSprites(
    vector< unique_ptr<PieceSprite> > &sprites,
    const vector< sf::Texture > &textures,
-   Board &board,
+   Chess::Board &board,
    sf::RenderWindow &window
 );
 
@@ -44,8 +44,8 @@ void checkPromotion(
    string &to
 );
 
-void makeMove(
-   Board &board,
+Chess::GameState makeMove(
+   Chess::Board &board,
    string &from,
    string &to,
    char &pieceToPromoteTo,
@@ -56,15 +56,15 @@ void makeMove(
 
 char getPieceToPromoteTo(
       sf::RenderWindow *window,
-      sf::Sprite &board,
+      sf::Sprite &boardSprite,
       vector< unique_ptr<PieceSprite> > *sprites,
       const unsigned &pieceToBePromotedIndex
 );
 
 int randomNumber(const int &from, const int &to);
 
-void pickRandomMove(Board &board, string &from, string &to);
+void pickRandomMove(Chess::Board &board, string &from, string &to);
 
-void playRandomMove(Board &board, string &from, string &to, vector<unique_ptr<PieceSprite>> &sprites);
+void playRandomMove(Chess::Board &board, string &from, string &to, vector<unique_ptr<PieceSprite>> &sprites);
 
 #endif

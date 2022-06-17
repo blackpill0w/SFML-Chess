@@ -3,6 +3,9 @@
 
 #include "piece.hpp"
 
+namespace Chess
+{
+
 class King : public Piece {
 public:
    King(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
@@ -17,6 +20,15 @@ protected:
    //**
    //********************************************
    void checkCastle();
+
+   //********************************************
+   //**
+   //** Check if a piece is protected.
+   //**
+   //********************************************
+   void isPieceProtected();
 };
+
+} // Chess namespace
 
 #endif

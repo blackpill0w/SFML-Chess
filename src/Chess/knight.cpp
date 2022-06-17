@@ -1,5 +1,8 @@
 #include "knight.hpp"
 
+namespace Chess
+{
+
 Knight::Knight(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos)
 : Piece(pieces, turn, type, pos)
 {
@@ -25,5 +28,14 @@ void Knight::setLegalMoves() {
       if (occupyingColor != color) {
          legalMoves.push_back(temp);
       }
+      else {
+         for (auto& piece: *pieces) {
+            if (piece->pos == temp && piece->alive) {
+               piece->isProtected = true;
+            }
+         }
+      }
    }
+}
+
 }

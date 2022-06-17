@@ -83,7 +83,7 @@ namespace utils {
    //** Highlights the moves of a piece.
    //**
    //********************************************
-   void highlightMoves(sf::RenderWindow *window, Board *board, unsigned &pieceIndex);
+   void highlightMoves(sf::RenderWindow *window, Chess::Board *board, unsigned &pieceIndex);
 
    //********************************************
    //**

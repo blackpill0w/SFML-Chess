@@ -64,7 +64,7 @@ namespace utils {
       return index;
    }
 
-   void highlightMoves(sf::RenderWindow *window, Board *board, unsigned &pieceIndex) {
+   void highlightMoves(sf::RenderWindow *window, Chess::Board *board, unsigned &pieceIndex) {
       for (auto& pos: board->pieces[pieceIndex]->legalMoves) {
          unique_ptr< sf::RectangleShape > p{ make_unique< sf::RectangleShape >(sf::RectangleShape({70, 70})) };
          p->setPosition(strToVectorf(pos));

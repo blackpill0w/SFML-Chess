@@ -1,15 +1,6 @@
 #include "game.hpp"
 
-void playGame(const string &fenStr) {
-   // Window
-   sf::RenderWindow window(
-      sf::VideoMode(utils::wWidth, utils::wHeight),
-      utils::gameTitle,
-      sf::Style::Titlebar | sf::Style::Close
-   );
-   window.setPosition( utils::wInitialPos );
-   window.setFramerateLimit(utils::fps);
-
+void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuman) {
    // Board texture
    sf::Texture boardTexture{};
    boardTexture.loadFromFile(utils::boardTexture);
@@ -19,8 +10,25 @@ void playGame(const string &fenStr) {
       utils::boardSize / boardSprite.getGlobalBounds().height
    );
 
-   Board board(fenStr);
+   sf::Font font;
+   font.loadFromFile("assets/fonts/UbuntuMono-R.ttf");
+
+   sf::Text gameEndText("Checkmate", font);
+   gameEndText.setPosition(sf::Vector2f(
+      (utils::wWidth / 2) - gameEndText.getGlobalBounds().width/2,
+      (utils::wHeight / 2) - gameEndText.getGlobalBounds().height/2  - 15
+   ));
+
+   sf::RectangleShape gameEndRect(sf::Vector2f(200.f, 100.f));
+   gameEndRect.setFillColor(sf::Color(0, 0, 0, 150));
+   gameEndRect.setPosition(sf::Vector2f(
+      (utils::wWidth / 2) - gameEndRect.getGlobalBounds().width/2,
+      (utils::wHeight / 2) - gameEndRect.getGlobalBounds().height/2
+   ));
+
+   Chess::Board board(fenStr);
    cout << "Possible moves: " << board.getNumberOfPossibleMoves() << '\n';
+   Chess::GameState gameState{};
 
    // Load textures (12 for 6 pieces & 2 colors)
    vector< sf::Texture > textures(12, sf::Texture());
@@ -87,15 +95,22 @@ void playGame(const string &fenStr) {
             if (spritePressedIndex != utils::invalidIndex && board.pieces[piecePressedIndex]->isValidMove(to)) {
                checkPromotion(&window, sprites, boardSprite, spritePressedIndex, pieceToPromoteTo, to);
             }
-            makeMove(board, from, to, pieceToPromoteTo, piecePressedIndex, sprites, spritePressedIndex);
+            gameState = makeMove(board, from, to, pieceToPromoteTo, piecePressedIndex, sprites, spritePressedIndex);
             cout << "Possible moves: " << board.getNumberOfPossibleMoves() << '\n';
-            if (board.turn == BLACK) {
+            if (!vsHuman && gameState == Chess::MoveSuccess  && board.turn == Chess::BLACK) {
                playRandomMove(board, from, to, sprites);
                cout << "Possible moves: " << board.getNumberOfPossibleMoves() << '\n';
+            }
+            if (gameState == Chess::Draw) {
+               gameEndText.setString("Draw");
             }
          }
       }
       draw(sprites, spritePressedIndex);
+      if (gameState == Chess::Draw || gameState == Chess::CheckMate) {
+         window.draw(gameEndRect);
+         window.draw(gameEndText);
+      }
 
             /****************************************/
 
@@ -130,7 +145,7 @@ void draw(
 void loadSprites(
    vector< unique_ptr<PieceSprite> > &sprites,
    const vector< sf::Texture > &textures,
-   Board &board,
+   Chess::Board &board,
    sf::RenderWindow &window
 ) {
    for (unsigned i=0u; i < board.pieces.size(); i++) {
@@ -139,8 +154,8 @@ void loadSprites(
    }
 }
 
-void makeMove(
-   Board &board,
+Chess::GameState makeMove(
+   Chess::Board &board,
    string &from,
    string &to,
    char &pieceToPromoteTo,
@@ -148,8 +163,9 @@ void makeMove(
    vector< unique_ptr<PieceSprite> > &sprites,
    unsigned &spritePressedIndex
 ) {
+   Chess::GameState gameState{};
    // Tell the board to move (the moving piece is deduced from the variable 'from')
-   board.move(from, to, pieceToPromoteTo);
+   gameState = board.move(from, to, pieceToPromoteTo);
 
    // Move the sprite to the new position, if the move isn't valid the piece (from Board) won't
    // move, meaning the sprite goes back to its initial position, so, no need for checking.
@@ -158,6 +174,7 @@ void makeMove(
    for (auto& sprite: sprites) {
       sprite->update();
    }
+   return gameState;
 }
 
 void checkPromotion(
@@ -176,7 +193,7 @@ void checkPromotion(
 
 char getPieceToPromoteTo(
       sf::RenderWindow *window,
-      sf::Sprite &board,
+      sf::Sprite &boardSprite,
       vector< unique_ptr<PieceSprite> > *sprites,
       const unsigned &pieceToBePromotedIndex
 ) {
@@ -257,7 +274,7 @@ char getPieceToPromoteTo(
          }
       }
 
-      window->draw(board);
+      window->draw(boardSprite);
       // Draw pieces
       for (auto& s: *sprites) {
          s->draw();
@@ -284,7 +301,7 @@ int randomNumber(const int &from, const int &to) {
    return randomNum(rng);
 }
 
-void pickRandomMove(Board &board, string &from, string &to) {
+void pickRandomMove(Chess::Board &board, string &from, string &to) {
    vector<string> piecesToMove{};
    for (auto& piece: board.pieces) {
       if (piece->color == board.turn && piece->alive) {
@@ -303,10 +320,11 @@ void pickRandomMove(Board &board, string &from, string &to) {
    to = board.pieces[pieceIndex]->legalMoves[ static_cast<unsigned>(randomNumber(0, board.pieces[pieceIndex]->legalMoves.size() - 1))];
 }
 
-void playRandomMove(Board &board, string &from, string &to, vector<unique_ptr<PieceSprite>> &sprites) {
+void playRandomMove(Chess::Board &board, string &from, string &to, vector<unique_ptr<PieceSprite>> &sprites) {
    pickRandomMove(board, from, to);
    board.move(from, to, 'q');
    for (auto& sprite: sprites) {
       sprite->update();
    }
 }
+

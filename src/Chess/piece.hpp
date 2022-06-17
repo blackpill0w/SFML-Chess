@@ -6,13 +6,15 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
-#include <cstring>
 
 using std::unique_ptr;
 using std::vector;
 using std::string;
 using std::find;
 using std::cout;
+
+namespace Chess
+{
 
 enum PieceColor {NONE = 0, BLACK, WHITE};
 
@@ -27,13 +29,15 @@ public:
    vector<string> legalMoves;
    const vector< unique_ptr<Piece> > *pieces;
    const PieceColor *turn;
-   // WARNING: Only for pawns
+   bool isProtected;
+   // NOTE: Only for pawns
    string attackingPositions[2];
    bool enPassant;
    int pawnMovementDirection;
-   // WARNING: Only for king
+   // NOTE: Only for king
    unsigned shortCastleRookIndex{ 65u };
    unsigned longCastleRookIndex{ 65u };
+   bool inCheck;
 public:
    Piece(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
 
@@ -105,5 +109,7 @@ protected:
    void removeMovesOutsideBoard();
 
 };
+
+} // Chess namespace
 
 #endif

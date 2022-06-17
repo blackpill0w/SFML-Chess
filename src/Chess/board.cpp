@@ -1,5 +1,8 @@
 #include "board.hpp"
 
+namespace Chess
+{
+
 Board::Board( const string &fenStr ) :
    pieces{}, turn{ WHITE },
    wKingIndex{ 0u }, bKingIndex{ 0u }, moveList{}, possibleMoves{ 0u }
@@ -228,13 +231,13 @@ void Board::checkPromoting(const unsigned &movingPieceIndex, const char &pieceTo
    }
 }
 
-bool Board::move(const string &from, const string &to, const char &pieceToPromoteTo) {
-   bool moveSuccess{ false };
+GameState Board::move(const string &from, const string &to, const char &pieceToPromoteTo) {
+   GameState gameState{ MoveFailed };
    unsigned movingPieceIndex{ 65u }; // More than a chess board can contain
 
    movingPieceIndex = getIndexOfPieceAt(from);
    if (movingPieceIndex == 65u) {
-      return false;
+      return MoveFailed;
    }
    if( pieces[movingPieceIndex]->color == turn && pieces[movingPieceIndex]->isValidMove(to) ) {
       // To save the move
@@ -244,7 +247,7 @@ bool Board::move(const string &from, const string &to, const char &pieceToPromot
       move.newPos = to;
 
       // Moved successfully
-      moveSuccess = true;
+      gameState = MoveSuccess;
       if (!pieces[movingPieceIndex]->hasMoved) {
          pieces[movingPieceIndex]->hasMoved = true;
          move.pieceHasMovedChanged = true;
@@ -274,21 +277,41 @@ bool Board::move(const string &from, const string &to, const char &pieceToPromot
 
       moveList.push_back(move);
    }
-   if (moveSuccess) {
+   if (gameState == MoveSuccess) {
       // Recalculate pieces' moves
       update();
    }
-   return moveSuccess;
+   if (possibleMoves == 0) {
+      if (pieces[wKingIndex]->inCheck || pieces[bKingIndex]->inCheck) {
+         gameState = CheckMate;
+      }
+      else {
+         gameState = Draw;
+      }
+   }
+   else if (isDrawByRepitition()) {
+      gameState = Draw;
+   }
+   return gameState;
 }
 
 void Board::update() {
+   // Reset class member 'isProtected'
+   for (auto& piece: pieces) {
+      if (piece->isProtected){
+         piece->isProtected = false;
+      }
+   }
+   // Update pieces
    for (auto& piece: pieces) {
       if (piece->alive){
          piece->update();
       }
    }
+   // King should be after all pieces updated their state
    pieces[wKingIndex]->update();
    pieces[bKingIndex]->update();
+
    handlePins();
    handleChecks();
    calculatePossibleMoves();
@@ -475,6 +498,9 @@ void Board::handleSlidingPiecesChecks() {
                   || (i < 4 && tolower(pieces[pieceIndex]->type) == 'r')
                   || (i >= 4 && tolower(pieces[pieceIndex]->type) == 'b')
                ) {
+                  // Put king in check
+                  pieces[kingIndex]->inCheck = true;
+                  // Get list of legal moves (block or take attacking piece)
                   vector<string> legalSquares{
                      getAllSquaresInBetween(pieces[kingIndex]->pos, pieces[pieceIndex]->pos, directions[i])
                   };
@@ -499,7 +525,6 @@ void Board::handleSlidingPiecesChecks() {
                         break;
                      }
                   }
-
                }
             }
             break;
@@ -524,6 +549,9 @@ void Board::handlePawnKnightCheck() {
       }
    }
    if (! attackingPiecesPos.empty()) {
+      // Put king in check
+      pieces[kingIndex]->inCheck = true;
+      // Remove illegal moves
       for (unsigned i=0u; i < pieces.size(); i++) {
          if (pieces[i]->color == pieces[kingIndex]->color && pieces[i]->pos != pieces[kingIndex]->pos) {
             removeMovesIfNotInVector(i, attackingPiecesPos);
@@ -544,3 +572,28 @@ void Board::calculatePossibleMoves() {
 unsigned Board::getNumberOfPossibleMoves() {
    return possibleMoves;
 }
+
+bool Board::isDrawByRepitition() {
+   //********************************************
+   //**
+   //** We check the last 8 moves.
+   //** If the first 4 moves are the same
+   //** as the last 4 moves, it's a draw
+   //**
+   //********************************************
+   if (moveList.size() >= 8) {
+      // First index of moves to check
+      unsigned i = moveList.size() - 8u;
+      if (
+         moveList[i] == moveList[i + 4]
+         && moveList[i + 1] == moveList[i + 5]
+         && moveList[i + 2] == moveList[i + 6]
+         && moveList[i + 3] == moveList[i + 7]
+      ) {
+         return true;
+      }
+   }
+   return false;
+}
+
+} // Chess namespace

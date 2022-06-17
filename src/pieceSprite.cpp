@@ -1,6 +1,6 @@
 #include "pieceSprite.hpp"
 
-PieceSprite::PieceSprite(const vector<sf::Texture> *textures, unsigned &pieceIndex, Board *board, sf::RenderWindow *window)
+PieceSprite::PieceSprite(const vector<sf::Texture> *textures, unsigned &pieceIndex, Chess::Board *board, sf::RenderWindow *window)
 :  textures{ textures }, sprite{ sf::Sprite() }, window{ window },
    pieceIndex{ pieceIndex }, board{ board }, alive{ true },
    pos{ (*board).pieces[pieceIndex]->pos }, pieceType{ (*board).pieces[pieceIndex]->type }
