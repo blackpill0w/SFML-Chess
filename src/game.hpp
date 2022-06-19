@@ -3,6 +3,7 @@
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 #include "utils.hpp"
 #include "Chess/board.hpp"
@@ -18,6 +19,8 @@ using std::string;
 using std::vector;
 using std::unique_ptr;
 using std::make_unique;
+
+void startApp();
 
 void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuman = true);
 
@@ -44,7 +47,7 @@ void checkPromotion(
    string &to
 );
 
-Chess::GameState makeMove(
+void makeMove(
    Chess::Board &board,
    string &from,
    string &to,
@@ -66,5 +69,7 @@ int randomNumber(const int &from, const int &to);
 void pickRandomMove(Chess::Board &board, string &from, string &to);
 
 void playRandomMove(Chess::Board &board, string &from, string &to, vector<unique_ptr<PieceSprite>> &sprites);
+
+void playSound(Chess::GameState &gameState, sf::Sound &sound);
 
 #endif

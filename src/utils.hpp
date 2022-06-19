@@ -41,9 +41,16 @@ namespace utils {
    extern const string boardTexture;
    //** Path to textures of the pieces
    extern string textures[12];
-
    //** To access the pieces' textures
    enum : unsigned int {wKing = 0u, bKing, wQueen, bQueen, wRook, bRook, wBishop, bBishop, wKnight, bKnight, wPawn, bPawn};
+   //** Sound files
+   extern string soundFiles[6];
+   //** To access the sound files
+   enum : unsigned int {
+      gameStart = 0u, move,
+      capture, check,
+      castle, gameEnd
+   };
 
    //********************************************
    //**

@@ -1,6 +1,23 @@
 #include "game.hpp"
 
+void startApp() {
+   sf::RenderWindow window(
+      sf::VideoMode(utils::wWidth, utils::wHeight),
+      utils::gameTitle,
+      sf::Style::Titlebar | sf::Style::Close
+   );
+   window.setPosition( utils::wInitialPos );
+   window.setFramerateLimit(utils::fps);
+
+   // Normal chess: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+   // For testing: "1r2kr2/pp1p1p2/2p4p/6pP/P1PP4/1P6/5PP1/R3K2R w KQ g6"
+   playGame(window, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+}
+
 void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuman) {
+   // Sound
+   sf::Sound sound;
+
    // Board texture
    sf::Texture boardTexture{};
    boardTexture.loadFromFile(utils::boardTexture);
@@ -10,6 +27,7 @@ void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuma
       utils::boardSize / boardSprite.getGlobalBounds().height
    );
 
+   // Font and texts
    sf::Font font;
    font.loadFromFile("assets/fonts/UbuntuMono-R.ttf");
 
@@ -27,8 +45,6 @@ void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuma
    ));
 
    Chess::Board board(fenStr);
-   cout << "Possible moves: " << board.getNumberOfPossibleMoves() << '\n';
-   Chess::GameState gameState{};
 
    // Load textures (12 for 6 pieces & 2 colors)
    vector< sf::Texture > textures(12, sf::Texture());
@@ -95,19 +111,18 @@ void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuma
             if (spritePressedIndex != utils::invalidIndex && board.pieces[piecePressedIndex]->isValidMove(to)) {
                checkPromotion(&window, sprites, boardSprite, spritePressedIndex, pieceToPromoteTo, to);
             }
-            gameState = makeMove(board, from, to, pieceToPromoteTo, piecePressedIndex, sprites, spritePressedIndex);
-            cout << "Possible moves: " << board.getNumberOfPossibleMoves() << '\n';
-            if (!vsHuman && gameState == Chess::MoveSuccess  && board.turn == Chess::BLACK) {
+            makeMove(board, from, to, pieceToPromoteTo, piecePressedIndex, sprites, spritePressedIndex);
+            playSound(board.gameState, sound);
+            if (!vsHuman && board.gameState == Chess::Moved  && board.turn == Chess::BLACK) {
                playRandomMove(board, from, to, sprites);
-               cout << "Possible moves: " << board.getNumberOfPossibleMoves() << '\n';
             }
-            if (gameState == Chess::Draw) {
+            if (board.gameState == Chess::Draw) {
                gameEndText.setString("Draw");
             }
          }
       }
       draw(sprites, spritePressedIndex);
-      if (gameState == Chess::Draw || gameState == Chess::CheckMate) {
+      if (board.gameState == Chess::Draw || board.gameState == Chess::CheckMate) {
          window.draw(gameEndRect);
          window.draw(gameEndText);
       }
@@ -154,7 +169,7 @@ void loadSprites(
    }
 }
 
-Chess::GameState makeMove(
+void makeMove(
    Chess::Board &board,
    string &from,
    string &to,
@@ -163,9 +178,8 @@ Chess::GameState makeMove(
    vector< unique_ptr<PieceSprite> > &sprites,
    unsigned &spritePressedIndex
 ) {
-   Chess::GameState gameState{};
    // Tell the board to move (the moving piece is deduced from the variable 'from')
-   gameState = board.move(from, to, pieceToPromoteTo);
+   board.move(from, to, pieceToPromoteTo);
 
    // Move the sprite to the new position, if the move isn't valid the piece (from Board) won't
    // move, meaning the sprite goes back to its initial position, so, no need for checking.
@@ -174,7 +188,6 @@ Chess::GameState makeMove(
    for (auto& sprite: sprites) {
       sprite->update();
    }
-   return gameState;
 }
 
 void checkPromotion(
@@ -325,6 +338,45 @@ void playRandomMove(Chess::Board &board, string &from, string &to, vector<unique
    board.move(from, to, 'q');
    for (auto& sprite: sprites) {
       sprite->update();
+   }
+}
+
+void playSound(Chess::GameState &gameState, sf::Sound &sound) {
+   static sf::SoundBuffer gameStart;
+   gameStart.loadFromFile(utils::soundFiles[utils::gameStart]);
+   static sf::SoundBuffer move;
+   move.loadFromFile(utils::soundFiles[utils::move]);
+   static sf::SoundBuffer capture;
+   capture.loadFromFile(utils::soundFiles[utils::capture]);
+   static sf::SoundBuffer check;
+   check.loadFromFile(utils::soundFiles[utils::check]);
+   static sf::SoundBuffer castle;
+   castle.loadFromFile(utils::soundFiles[utils::castle]);
+   static sf::SoundBuffer gameEnd;
+   gameEnd.loadFromFile(utils::soundFiles[utils::gameEnd]);
+
+   switch (gameState) {
+      case Chess::Moved:
+         sound.setBuffer(move);
+         break;
+      case Chess::MoveAndCapture:
+         sound.setBuffer(capture);
+         break;
+      case Chess::MoveAndCastle:
+         sound.setBuffer(castle);
+         break;
+      case Chess::Check:
+         sound.setBuffer(check);
+         break;
+      case Chess::CheckMate:
+      case Chess::Draw:
+         sound.setBuffer(gameEnd);
+         break;
+      default:
+         break;
+   }
+   if (gameState != Chess::MoveFailed) {
+      sound.play();
    }
 }
 

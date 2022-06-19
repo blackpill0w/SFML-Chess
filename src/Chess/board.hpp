@@ -1,6 +1,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include <filesystem>
 #include <memory>
 #include <algorithm>
 #include <iostream>
@@ -18,7 +19,11 @@ using std::find;
 
 namespace Chess
 {
-enum GameState { MoveFailed, MoveSuccess, CheckMate, Draw};
+enum GameState {
+   MoveFailed, Moved,
+   MoveAndCapture, MoveAndCastle,
+   Check, CheckMate, Draw
+};
 
 class MoveData {
 public:
@@ -73,6 +78,13 @@ public:
    //**
    //********************************************
    PieceColor turn;
+
+   //********************************************
+   //**
+   //** Game's state.
+   //**
+   //********************************************
+   GameState gameState;
 protected:
    //********************************************
    //**
@@ -123,7 +135,7 @@ public:
    //** the piece to be moved is deduced from the 'from' var.
    //**
    //********************************************
-   GameState move(const string &from, const string &to, const char &pieceToPromoteTo = 0);
+   void move(const string &from, const string &to, const char &pieceToPromoteTo = 0);
 
    //********************************************
    //**
@@ -279,6 +291,13 @@ protected:
    //**
    //********************************************
    bool isDrawByRepitition();
+
+   //********************************************
+   //**
+   //** Checks if there is a checkmate or a draw.
+   //**
+   //********************************************
+   void checkGameEnd();
 }; // Board class
 
 } // Chess namespace

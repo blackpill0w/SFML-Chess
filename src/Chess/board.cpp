@@ -4,8 +4,9 @@ namespace Chess
 {
 
 Board::Board( const string &fenStr ) :
-   pieces{}, turn{ WHITE },
-   wKingIndex{ 0u }, bKingIndex{ 0u }, moveList{}, possibleMoves{ 0u }
+   pieces{}, turn{ WHITE }, gameState{ MoveFailed },
+   wKingIndex{ 0u }, bKingIndex{ 0u }, moveList{},
+   possibleMoves{ 0u }
 {
    if (fenStr != "") {
       loadFEN(fenStr);
@@ -16,9 +17,10 @@ Board::Board( const string &fenStr ) :
    this->update();
 }
 
-Board::Board(const Board &other)
-: pieces{}, turn{ other.turn }, wKingIndex{ other.wKingIndex },
-  bKingIndex{ other.bKingIndex }, moveList{ other.moveList }, possibleMoves{ other.possibleMoves }
+Board::Board(const Board &other):
+   pieces{}, turn{ other.turn }, gameState{ other.gameState },
+   wKingIndex{ other.wKingIndex }, bKingIndex{ other.bKingIndex },
+   moveList{ other.moveList }, possibleMoves{ other.possibleMoves }
 {
    // Copy the pieces
    for (unsigned i=0; i < other.pieces.size(); i++) {
@@ -44,6 +46,9 @@ Board::Board(const Board &other)
 }
 
 void Board::loadFEN(const string &fenStr) {
+   if ( !pieces.empty() ) {
+      pieces.clear();
+   }
    enum { wKingSide = 0, wQueenSide, bKingSide, bQueenSide };
 
    string x{ "a" };
@@ -112,12 +117,7 @@ unsigned Board::getIndexOfPieceAt(const string &pos, const PieceColor &colorToBe
 }
 
 void Board::changeTurn() {
-   if (turn == WHITE) {
-      turn = BLACK;
-   }
-   else {
-      turn = WHITE;
-   }
+   turn == WHITE ? turn = BLACK : turn = WHITE;
 }
 
 void Board::removePiece(const unsigned &index) {
@@ -185,20 +185,18 @@ unsigned Board::checkIfMoveWasEnPassant(const unsigned &movingPieceIndex, const 
 
 void Board::checkTaking(const unsigned &movingPieceIndex, const string &from, const string &to, MoveData &move) {
    unsigned pieceToBeRemoveIndex{ 65u };
-   bool isEnPassant{ false };
    pieceToBeRemoveIndex = getIndexOfPieceAt(pieces[movingPieceIndex]->pos, pieces[movingPieceIndex]->color);
 
    //** Check en passant
    if (pieceToBeRemoveIndex == 65u) {
       pieceToBeRemoveIndex = checkIfMoveWasEnPassant(movingPieceIndex, from, to);
-      isEnPassant = true;
+      if (pieceToBeRemoveIndex != 65u) {
+         move.isMoveEnPassant = true;
+      }
    }
    if (pieceToBeRemoveIndex != 65u) {
       removePiece(pieceToBeRemoveIndex);
       move.takenPieceIndex = pieceToBeRemoveIndex;
-      if (isEnPassant) {
-         move.isMoveEnPassant = true;
-      }
    }
 }
 
@@ -231,68 +229,83 @@ void Board::checkPromoting(const unsigned &movingPieceIndex, const char &pieceTo
    }
 }
 
-GameState Board::move(const string &from, const string &to, const char &pieceToPromoteTo) {
-   GameState gameState{ MoveFailed };
-   unsigned movingPieceIndex{ 65u }; // More than a chess board can contain
+void Board::move(const string &from, const string &to, const char &pieceToPromoteTo) {
+   if (gameState != CheckMate && gameState != Draw) {
+      gameState = MoveFailed;
+      unsigned movingPieceIndex{ 65u }; // More than a chess board can contain
 
-   movingPieceIndex = getIndexOfPieceAt(from);
-   if (movingPieceIndex == 65u) {
-      return MoveFailed;
-   }
-   if( pieces[movingPieceIndex]->color == turn && pieces[movingPieceIndex]->isValidMove(to) ) {
-      // To save the move
-      MoveData move;
-      move.movingPieceIndex = movingPieceIndex;
-      move.oldPos = from;
-      move.newPos = to;
-
-      // Moved successfully
-      gameState = MoveSuccess;
-      if (!pieces[movingPieceIndex]->hasMoved) {
-         pieces[movingPieceIndex]->hasMoved = true;
-         move.pieceHasMovedChanged = true;
+      movingPieceIndex = getIndexOfPieceAt(from);
+      // If there is no piece at the 'from' position, return
+      if (movingPieceIndex == 65u) {
+         return;
       }
-      changeTurn();
-      //** If the move is not castle, else, everything is done
-      //** inside the isMoveCastle() function
-      if ( !isMoveCastle(movingPieceIndex, from, to) ) {
-         //** Check wether to enable en passant
-         checkEnableEnPassant(movingPieceIndex, from, to);
 
-         // Put the piece in the new position
-         pieces[movingPieceIndex]->pos = to;
+      if( pieces[movingPieceIndex]->color == turn && pieces[movingPieceIndex]->isValidMove(to) ) {
+         // To save the move
+         MoveData move;
+         move.movingPieceIndex = movingPieceIndex;
+         move.oldPos = from;
+         move.newPos = to;
 
-         //** Take piece is there is any
-         checkTaking(movingPieceIndex, from, to, move);
+         // Moved successfully
+         gameState = Moved;
+         if (!pieces[movingPieceIndex]->hasMoved) {
+            pieces[movingPieceIndex]->hasMoved = true;
+            move.pieceHasMovedChanged = true;
+         }
+         changeTurn();
+         //** If the move is not castle, else, everything is done
+         //** inside the isMoveCastle() function
+         if ( !isMoveCastle(movingPieceIndex, from, to) ) {
+            //** Check wether to enable en passant
+            checkEnableEnPassant(movingPieceIndex, from, to);
+
+            // Put the piece in the new position
+            pieces[movingPieceIndex]->pos = to;
+
+            //** Take piece is there is any
+            checkTaking(movingPieceIndex, from, to, move);
+            if (move.takenPieceIndex != 65u) {
+               gameState = MoveAndCapture;
+            }
+         }
+         else {
+            handleCastling(movingPieceIndex, from, to);
+            move.isMoveCastle = true;
+            gameState = MoveAndCastle;
+         }
+         // Disable en passant
+         checkDisableEnPassant();
+
+         // Check promoting
+         checkPromoting(movingPieceIndex, pieceToPromoteTo, move);
+
+         moveList.emplace_back(move);
+         if (gameState == Moved || gameState == MoveAndCapture || gameState == MoveAndCastle || gameState == Check) {
+            // Recalculate pieces' moves
+            update();
+         }
+         checkGameEnd();
       }
-      else {
-         handleCastling(movingPieceIndex, from, to);
-         move.isMoveCastle = true;
-      }
-      // Disable en passant
-      checkDisableEnPassant();
-
-      // Check promoting
-      checkPromoting(movingPieceIndex, pieceToPromoteTo, move);
-
-      moveList.push_back(move);
    }
-   if (gameState == MoveSuccess) {
-      // Recalculate pieces' moves
-      update();
-   }
+}
+
+void Board::checkGameEnd() {
+   unsigned kingIndex { turn == WHITE ? wKingIndex : bKingIndex };
    if (possibleMoves == 0) {
-      if (pieces[wKingIndex]->inCheck || pieces[bKingIndex]->inCheck) {
+      if (pieces[kingIndex]->inCheck) {
          gameState = CheckMate;
       }
       else {
          gameState = Draw;
       }
    }
+   else if (pieces[kingIndex]->inCheck) {
+      gameState = Check;
+   }
    else if (isDrawByRepitition()) {
       gameState = Draw;
    }
-   return gameState;
 }
 
 void Board::update() {
@@ -318,7 +331,7 @@ void Board::update() {
 }
 
 void Board::undoLastMove() {
-   if (!moveList.empty()) {
+   if ( !moveList.empty() ) {
       MoveData lastMove = { moveList[moveList.size() - 1u] };
       // Type of pawn if move was a promotion
       char type{ 'P' };

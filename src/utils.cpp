@@ -1,5 +1,11 @@
 #include "utils.hpp"
 
+// File seperators
+const string sep{ "/" };
+#ifdef _WIN32
+   sep = "\\"
+#endif
+
 namespace utils {
 
    extern const unsigned int invalidIndex{ std::numeric_limits< unsigned int >::max() };
@@ -14,20 +20,31 @@ namespace utils {
    extern const string fontFile{ "assets/fonts/UbuntuMono-R.ttf" };
    extern const string boardTexture{ "assets/img/chess-board.png" };
 
+   string texturesFolder{ "assets" + sep + "img" + sep + "pieces" + sep };
    string textures[12] = {
-      "assets/img/pieces/wk.png",
-      "assets/img/pieces/bk.png",
-      "assets/img/pieces/wq.png",
-      "assets/img/pieces/bq.png",
-      "assets/img/pieces/wr.png",
-      "assets/img/pieces/br.png",
-      "assets/img/pieces/wb.png",
-      "assets/img/pieces/bb.png",
-      "assets/img/pieces/wn.png",
-      "assets/img/pieces/bn.png",
-      "assets/img/pieces/wp.png",
-      "assets/img/pieces/bp.png"
-    };
+      texturesFolder + "wk.png",
+      texturesFolder + "bk.png",
+      texturesFolder + "wq.png",
+      texturesFolder + "bq.png",
+      texturesFolder + "wr.png",
+      texturesFolder + "br.png",
+      texturesFolder + "wb.png",
+      texturesFolder + "bb.png",
+      texturesFolder + "wn.png",
+      texturesFolder + "bn.png",
+      texturesFolder + "wp.png",
+      texturesFolder + "bp.png"
+   };
+
+   string soundFilesFolder{ "assets" + sep + "sound_effects" + sep };
+   string soundFiles[6] = {
+      soundFilesFolder + "game-start.ogg",
+      soundFilesFolder + "move.ogg",
+      soundFilesFolder + "capture.ogg",
+      soundFilesFolder + "check.ogg",
+      soundFilesFolder + "castle.ogg",
+      soundFilesFolder + "game-end.ogg",
+   };
 
 
    sf::Vector2f adjustMousePos(const sf::Vector2f &mousePos) {
@@ -68,7 +85,7 @@ namespace utils {
       for (auto& pos: board->pieces[pieceIndex]->legalMoves) {
          unique_ptr< sf::RectangleShape > p{ make_unique< sf::RectangleShape >(sf::RectangleShape({70, 70})) };
          p->setPosition(strToVectorf(pos));
-         p->setFillColor(sf::Color(255, 0, 0, 130));
+         p->setFillColor(sf::Color(255, 0, 0, 120));
          window->draw(*p);
       }
    }
