@@ -8,7 +8,7 @@ namespace Chess
 
 class Bishop : public Piece {
 public:
-   Bishop(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
+   Bishop(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos);
 };
 
 }

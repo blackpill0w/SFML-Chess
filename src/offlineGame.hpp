@@ -1,12 +1,13 @@
-#ifndef GAME_HPP
-#define GAME_HPP
+#ifndef OFFLINE_GAME_HPP
+#define OFFLINE_GAME_HPP
 
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
 
-#include "utils.hpp"
+#include "Utils/utils.hpp"
+#include "pieceSprite.hpp"
 #include "Chess/board.hpp"
+#include "onlineGame.hpp"
 
 #include <string>
 #include <vector>
@@ -15,35 +16,25 @@
 #include <iostream>
 
 using std::cout;
+using std::make_unique;
 using std::string;
 using std::vector;
 using std::unique_ptr;
-using std::make_unique;
 
-void startApp();
-
-void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuman = true);
+void offlineGame(sf::RenderWindow &window, const string &fenStr);
 
 void loadSprites(
-   vector< unique_ptr<PieceSprite> > &sprites,
+   vector< PieceSprite > &sprites,
    const vector< sf::Texture > &textures,
    Chess::Board &board,
    sf::RenderWindow &window
 );
 
-void keepPieceInsideBoard(sf::Vector2f &pos);
-
-void draw(
-   vector< unique_ptr<PieceSprite> > &sprites,
-   unsigned &spritePressedIndex
-);
-
-void checkPromotion(
+char checkPromotion(
    sf::RenderWindow *window,
-   vector< unique_ptr<PieceSprite> > &sprites,
+   vector< PieceSprite > &sprites,
    sf::Sprite &boardSprite,
    unsigned &spritePressedIndex,
-   char &pieceToPromoteTo,
    string &to
 );
 
@@ -51,16 +42,16 @@ void makeMove(
    Chess::Board &board,
    string &from,
    string &to,
-   char &pieceToPromoteTo,
+   char pieceToPromoteTo,
    unsigned &piecePressedIndex,
-   vector< unique_ptr<PieceSprite> > &sprites,
+   vector< PieceSprite > &sprites,
    unsigned &spritePressedIndex
 );
 
 char getPieceToPromoteTo(
       sf::RenderWindow *window,
       sf::Sprite &boardSprite,
-      vector< unique_ptr<PieceSprite> > *sprites,
+      vector< PieceSprite > *sprites,
       const unsigned &pieceToBePromotedIndex
 );
 

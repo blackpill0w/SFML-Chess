@@ -6,13 +6,14 @@ namespace Chess
 Board::Board( const string &fenStr ) :
    pieces{}, turn{ WHITE }, gameState{ MoveFailed },
    wKingIndex{ 0u }, bKingIndex{ 0u }, moveList{},
-   possibleMoves{ 0u }
+   possibleMoves{ 0u }, initialPiecesNum{ 0u }
 {
    if (fenStr != "") {
       loadFEN(fenStr);
       pieces[wKingIndex]->setRooksIndex();
       pieces[bKingIndex]->setRooksIndex();
    }
+   initialPiecesNum = pieces.size();
    // Calculate pieces' moves
    this->update();
 }
@@ -20,7 +21,7 @@ Board::Board( const string &fenStr ) :
 Board::Board(const Board &other):
    pieces{}, turn{ other.turn }, gameState{ other.gameState },
    wKingIndex{ other.wKingIndex }, bKingIndex{ other.bKingIndex },
-   moveList{ other.moveList }, possibleMoves{ other.possibleMoves }
+   moveList{ other.moveList }, possibleMoves{ other.possibleMoves }, initialPiecesNum{ other.initialPiecesNum }
 {
    // Copy the pieces
    for (unsigned i=0; i < other.pieces.size(); i++) {
@@ -200,7 +201,7 @@ void Board::checkTaking(const unsigned &movingPieceIndex, const string &from, co
    }
 }
 
-void Board::checkPromoting(const unsigned &movingPieceIndex, const char &pieceToPromoteTo, MoveData &move) {
+void Board::checkPromoting(const unsigned &movingPieceIndex, const char pieceToPromoteTo, MoveData &move) {
    // What's happening here is basically
    if (pieceToPromoteTo != 0 && tolower(pieces[movingPieceIndex]->type) == 'p') {
       if (pieces[movingPieceIndex]->pos[1] == '1' || pieces[movingPieceIndex]->pos[1] == '8') {
@@ -229,7 +230,7 @@ void Board::checkPromoting(const unsigned &movingPieceIndex, const char &pieceTo
    }
 }
 
-void Board::move(const string &from, const string &to, const char &pieceToPromoteTo) {
+void Board::move(const string &from, const string &to, const char pieceToPromoteTo) {
    if (gameState != CheckMate && gameState != Draw) {
       gameState = MoveFailed;
       unsigned movingPieceIndex{ 65u }; // More than a chess board can contain
@@ -317,7 +318,7 @@ void Board::update() {
    }
    // Update pieces
    for (auto& piece: pieces) {
-      if (piece->alive){
+      if (piece->alive) {
          piece->update();
       }
    }
@@ -470,8 +471,6 @@ void Board::handlePins() {
          temp[1] += directions[i][1];
       }
    }
-
-
 }
 
 void Board::handleChecks() {
@@ -607,6 +606,18 @@ bool Board::isDrawByRepitition() {
       }
    }
    return false;
+}
+
+void Board::reset() {
+   while (pieces.size() != initialPiecesNum) {
+      pieces.erase(pieces.begin() + initialPiecesNum);
+   }
+   for (auto& piece: pieces) {
+      piece->reset();
+   }
+   update();
+   turn = WHITE;
+   gameState = MoveFailed;
 }
 
 } // Chess namespace

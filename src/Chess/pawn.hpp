@@ -8,7 +8,7 @@ namespace Chess
 
 class Pawn : public Piece {
 public:
-   Pawn(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
+   Pawn(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos);
    void setLegalMoves() override;
    void update() override;
 protected:

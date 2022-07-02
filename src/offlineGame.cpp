@@ -1,20 +1,6 @@
-#include "game.hpp"
+#include "offlineGame.hpp"
 
-void startApp() {
-   sf::RenderWindow window(
-      sf::VideoMode(utils::wWidth, utils::wHeight),
-      utils::gameTitle,
-      sf::Style::Titlebar | sf::Style::Close
-   );
-   window.setPosition( utils::wInitialPos );
-   window.setFramerateLimit(utils::fps);
-
-   // Normal chess: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
-   // For testing: "1r2kr2/pp1p1p2/2p4p/6pP/P1PP4/1P6/5PP1/R3K2R w KQ g6"
-   playGame(window, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-}
-
-void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuman) {
+void offlineGame(sf::RenderWindow &window, const string &fenStr) {
    // Sound
    sf::Sound sound;
 
@@ -33,38 +19,38 @@ void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuma
 
    sf::Text gameEndText("Checkmate", font);
    gameEndText.setPosition(sf::Vector2f(
-      (utils::wWidth / 2) - gameEndText.getGlobalBounds().width/2,
-      (utils::wHeight / 2) - gameEndText.getGlobalBounds().height/2  - 15
+      (utils::wWidth / 2.f) - gameEndText.getGlobalBounds().width/2,
+      (utils::wHeight / 2.f) - gameEndText.getGlobalBounds().height/2  - 15
    ));
 
    sf::RectangleShape gameEndRect(sf::Vector2f(200.f, 100.f));
    gameEndRect.setFillColor(sf::Color(0, 0, 0, 150));
    gameEndRect.setPosition(sf::Vector2f(
-      (utils::wWidth / 2) - gameEndRect.getGlobalBounds().width/2,
-      (utils::wHeight / 2) - gameEndRect.getGlobalBounds().height/2
+      (utils::wWidth / 2.f) - gameEndRect.getGlobalBounds().width/2,
+      (utils::wHeight / 2.f) - gameEndRect.getGlobalBounds().height/2
    ));
 
    Chess::Board board(fenStr);
 
    // Load textures (12 for 6 pieces & 2 colors)
-   vector< sf::Texture > textures(12, sf::Texture());
+   vector< sf::Texture > textures;
    utils::loadTextures(textures);
 
    // Sprites of the pieces
-   vector< unique_ptr<PieceSprite> > sprites{};
+   vector< PieceSprite > sprites{};
    loadSprites(sprites, textures, board, window);
 
    // Helpers
-   sf::Vector2f mousePos{};
-   bool mouseReleased{ false };
-   //** This keeps track of the sprite pressed (being moved)
-   unsigned int spritePressedIndex{ utils::invalidIndex };
+   sf::Vector2f   mousePos{};
+   bool           mouseReleased{ false };
+   //** This keeps track of the sprite being dragged
+   unsigned       spritePressedIndex{ utils::invalidIndex };
    //** And this is the corresponding piece (from Board)
-   unsigned piecePressedIndex{ utils::invalidIndex };
+   unsigned       piecePressedIndex{ utils::invalidIndex };
    // From and to where the sprite has moved
-   string from{};
-   string to{};
-   char pieceToPromoteTo{ 0 };
+   string         from{};
+   string         to{};
+   char           pieceToPromoteTo{ 'q' };
 
    while (window.isOpen()) {
       sf::Event event;
@@ -75,17 +61,27 @@ void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuma
          else if (event.type == sf::Event::MouseButtonPressed) {
             spritePressedIndex = utils::getSpriteIndexAt(sprites, mousePos);
             if (spritePressedIndex != utils::invalidIndex) {
-               piecePressedIndex = sprites[spritePressedIndex]->pieceIndex;
+               piecePressedIndex = sprites[spritePressedIndex].pieceIndex;
                from = utils::posToStr(mousePos);
             }
          }
          else if (event.type == sf::Event::MouseButtonReleased) {
-            mouseReleased = true;
+            if (spritePressedIndex != utils::invalidIndex) {
+               mouseReleased = true;
+            }
          }
          else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::U) {
             board.undoLastMove();
             for (auto& sprite: sprites) {
-               sprite->update();
+               sprite.update();
+            }
+         }
+         else if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R) {
+            if (board.gameState == Chess::Draw || board.gameState == Chess::CheckMate) {
+               board.reset();
+               for (auto& sprite: sprites) {
+                  sprite.update();
+               }
             }
          }
       }
@@ -97,31 +93,30 @@ void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuma
       window.draw(boardSprite);
       if (spritePressedIndex != utils::invalidIndex) {
          // Make sure the piece stays inside the board when moving it
-         keepPieceInsideBoard(mousePos);
+         utils::keepPieceInsideBoard(mousePos);
          // Follow the mouse
-         sprites[spritePressedIndex]->move({mousePos.x - (utils::pieceSize / 2), mousePos.y - (utils::pieceSize / 2)});
+         sprites[spritePressedIndex].move({mousePos.x - (utils::pieceSize / 2.f), mousePos.y - (utils::pieceSize / 2.f)});
          if (board.pieces[piecePressedIndex]->color == board.turn) {
-            utils::highlightMoves(&window, &board, piecePressedIndex);
+            utils::highlightMoves(&window, board.pieces[spritePressedIndex]->legalMoves);
          }
-      }
-      if (mouseReleased) {
-         mouseReleased = false;
-         if (spritePressedIndex != utils::invalidIndex) {
+         // Play move
+         if (mouseReleased) {
+            mouseReleased = false;
             to = utils::posToStr(mousePos);
             if (spritePressedIndex != utils::invalidIndex && board.pieces[piecePressedIndex]->isValidMove(to)) {
-               checkPromotion(&window, sprites, boardSprite, spritePressedIndex, pieceToPromoteTo, to);
+               pieceToPromoteTo = checkPromotion(&window, sprites, boardSprite, spritePressedIndex, to);
             }
             makeMove(board, from, to, pieceToPromoteTo, piecePressedIndex, sprites, spritePressedIndex);
             playSound(board.gameState, sound);
-            if (!vsHuman && board.gameState == Chess::Moved  && board.turn == Chess::BLACK) {
-               playRandomMove(board, from, to, sprites);
-            }
+            //if (!vsHuman && board.gameState == Chess::Moved  && board.turn == Chess::BLACK) {
+            //   playRandomMove(board, from, to, sprites);
+            //}
             if (board.gameState == Chess::Draw) {
                gameEndText.setString("Draw");
             }
          }
       }
-      draw(sprites, spritePressedIndex);
+      utils::drawSprites(sprites, spritePressedIndex);
       if (board.gameState == Chess::Draw || board.gameState == Chess::CheckMate) {
          window.draw(gameEndRect);
          window.draw(gameEndText);
@@ -131,41 +126,18 @@ void playGame(sf::RenderWindow &window, const string &fenStr, const bool &vsHuma
 
       window.display();
    }
-}
 
-void keepPieceInsideBoard(sf::Vector2f &pos) {
-   if (pos.x < (utils::pieceSize / 2))
-      pos.x = (utils::pieceSize / 2);
-   else if (pos.x > utils::boardSize - (utils::pieceSize / 2))
-      pos.x = utils::boardSize - (utils::pieceSize / 2);
-   if (pos.y < (utils::pieceSize / 2))
-      pos.y = (utils::pieceSize / 2);
-   else if (pos.y > utils::boardSize - (utils::pieceSize / 2))
-      pos.y = utils::boardSize - (utils::pieceSize / 2);
-}
-
-void draw(
-   vector< unique_ptr<PieceSprite> > &sprites,
-   unsigned &spritePressedIndex
-) {
-   for (auto& sprite: sprites) {
-      sprite->draw();
-   }
-   // Keep selected sprite on top of all sprites
-   if (spritePressedIndex != utils::invalidIndex) {
-      sprites[spritePressedIndex]->draw();
-   }
 }
 
 void loadSprites(
-   vector< unique_ptr<PieceSprite> > &sprites,
+   vector< PieceSprite > &sprites,
    const vector< sf::Texture > &textures,
    Chess::Board &board,
    sf::RenderWindow &window
 ) {
+   sprites.reserve(board.pieces.size());
    for (unsigned i=0u; i < board.pieces.size(); i++) {
-      PieceSprite temp(&textures, i, &board, &window);
-      sprites.emplace_back(make_unique<PieceSprite>(temp));
+      sprites.emplace_back( PieceSprite(&textures, i, &board, &window) );
    }
 }
 
@@ -173,41 +145,41 @@ void makeMove(
    Chess::Board &board,
    string &from,
    string &to,
-   char &pieceToPromoteTo,
+   char pieceToPromoteTo,
    unsigned &piecePressedIndex,
-   vector< unique_ptr<PieceSprite> > &sprites,
+   vector< PieceSprite > &sprites,
    unsigned &spritePressedIndex
 ) {
-   // Tell the board to move (the moving piece is deduced from the variable 'from')
+   // Make a move
    board.move(from, to, pieceToPromoteTo);
 
    // Move the sprite to the new position, if the move isn't valid the piece (from Board) won't
    // move, meaning the sprite goes back to its initial position, so, no need for checking.
-   sprites[spritePressedIndex]->move( utils::strToVectorf(board.pieces[piecePressedIndex]->pos) );
+   sprites[spritePressedIndex].move( utils::strToVectorf(board.pieces[piecePressedIndex]->pos) );
    spritePressedIndex = utils::invalidIndex;
    for (auto& sprite: sprites) {
-      sprite->update();
+      sprite.update();
    }
 }
 
-void checkPromotion(
+char checkPromotion(
    sf::RenderWindow *window,
-   vector< unique_ptr<PieceSprite> > &sprites,
+   vector< PieceSprite > &sprites,
    sf::Sprite &boardSprite,
    unsigned &spritePressedIndex,
-   char &pieceToPromoteTo,
    string &to
 ) {
-   if ( tolower(sprites[spritePressedIndex]->pieceType) == 'p' && (to[1] == '1' || to[1] == '8')) {
+   if ( tolower(sprites[spritePressedIndex].pieceType) == 'p' && (to[1] == '1' || to[1] == '8')) {
       // Get the type of piece to promote to
-      pieceToPromoteTo = getPieceToPromoteTo(window, boardSprite, &sprites, spritePressedIndex);
+      return getPieceToPromoteTo(window, boardSprite, &sprites, spritePressedIndex);
    }
+   return 'q';
 }
 
 char getPieceToPromoteTo(
       sf::RenderWindow *window,
       sf::Sprite &boardSprite,
-      vector< unique_ptr<PieceSprite> > *sprites,
+      vector< PieceSprite > *sprites,
       const unsigned &pieceToBePromotedIndex
 ) {
    char piece{ 0 };
@@ -289,9 +261,7 @@ char getPieceToPromoteTo(
 
       window->draw(boardSprite);
       // Draw pieces
-      for (auto& s: *sprites) {
-         s->draw();
-      }
+      utils::drawSprites(*sprites);
       // Draw promotion menu
       for (int i=0; i<4; i++) {
          window->draw(rects[i]);
@@ -300,8 +270,8 @@ char getPieceToPromoteTo(
 
       window->display();
    }
-   // Match cas of the choice with the piece (make them have the same color)
-   if ( isupper( (*sprites)[pieceToBePromotedIndex]->pieceType ) ) {
+   // Match case of the choice with the piece (make them have the same color)
+   if ( isupper( (*sprites)[pieceToBePromotedIndex].pieceType ) ) {
       piece = toupper(piece);
    }
    return piece;
@@ -333,11 +303,11 @@ void pickRandomMove(Chess::Board &board, string &from, string &to) {
    to = board.pieces[pieceIndex]->legalMoves[ static_cast<unsigned>(randomNumber(0, board.pieces[pieceIndex]->legalMoves.size() - 1))];
 }
 
-void playRandomMove(Chess::Board &board, string &from, string &to, vector<unique_ptr<PieceSprite>> &sprites) {
+void playRandomMove(Chess::Board &board, string &from, string &to, vector<PieceSprite> &sprites) {
    pickRandomMove(board, from, to);
    board.move(from, to, 'q');
    for (auto& sprite: sprites) {
-      sprite->update();
+      sprite.update();
    }
 }
 

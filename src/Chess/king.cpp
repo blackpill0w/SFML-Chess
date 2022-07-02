@@ -3,7 +3,7 @@
 namespace Chess
 {
 
-King::King(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos)
+King::King(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos)
 : Piece(pieces, turn, type, pos)
 {
 }
@@ -35,7 +35,7 @@ void King::checkCastle() {
       if (isPosOccupied("f"+y) == NONE && isPosOccupied("g"+y) == NONE) {
          // Also not attacked
          if ( !( canPosBeAttacked("g"+y, color) || canPosBeAttacked("f"+y, color)) ) {
-            legalMoves.push_back("g"+y);
+            legalMoves.emplace_back("g"+y);
          }
       }
    }
@@ -44,7 +44,7 @@ void King::checkCastle() {
       if (isPosOccupied("b"+y) == NONE && isPosOccupied("c"+y) == NONE && isPosOccupied("d"+y) == NONE) {
          // c1/c8 && d1/d8 souldn't be attacked
          if ( !( canPosBeAttacked("c"+y, color) || canPosBeAttacked("d"+y, color)) ) {
-            legalMoves.push_back("c"+y);
+            legalMoves.emplace_back("c"+y);
          }
       }
    }
@@ -90,13 +90,13 @@ void King::setLegalMoves() {
                   for (auto& piece: *pieces) {
                      if (piece->pos == temp && piece->alive) {
                         if (!piece->isProtected) {
-                           legalMoves.push_back(temp);
+                           legalMoves.emplace_back(temp);
                         }
                      }
                   }
                }
                else {
-                  legalMoves.push_back(temp);
+                  legalMoves.emplace_back(temp);
                }
             }
          }

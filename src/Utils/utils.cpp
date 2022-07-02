@@ -8,7 +8,7 @@ const string sep{ "/" };
 
 namespace utils {
 
-   extern const unsigned int invalidIndex{ std::numeric_limits< unsigned int >::max() };
+   extern const unsigned int invalidIndex{ 5000u }; // Big enough for a chess game
    extern const unsigned int fps{ 60u };
 
    extern const int pieceSize{ 70 };
@@ -46,6 +46,10 @@ namespace utils {
       soundFilesFolder + "game-end.ogg",
    };
 
+   // Server settings
+   extern const unsigned port{ 9991u };
+   extern const string startGameStr( "*start game*" );
+   extern const string disconnectStr( "*disconnect*" );
 
    sf::Vector2f adjustMousePos(const sf::Vector2f &mousePos) {
       sf::Vector2f m;
@@ -68,37 +72,14 @@ namespace utils {
       return p;
    }
 
-   unsigned getSpriteIndexAt(const vector< unique_ptr<PieceSprite> > &sprites, const sf::Vector2f &pos) {
-      unsigned index{ invalidIndex };
-      for (unsigned j=0 ; j < sprites.size(); j++ ) {
-         if (sprites[j]->alive) {
-            if (sprites[j]->sprite.getGlobalBounds().contains(pos)) {
-               index = j;
-               break;
-            }
-         }
-      }
-      return index;
-   }
-
-   void highlightMoves(sf::RenderWindow *window, Chess::Board *board, unsigned &pieceIndex) {
-      for (auto& pos: board->pieces[pieceIndex]->legalMoves) {
+   void highlightMoves(sf::RenderWindow *window, vector<string> &moves) {
+      for (auto& move: moves) {
          unique_ptr< sf::RectangleShape > p{ make_unique< sf::RectangleShape >(sf::RectangleShape({70, 70})) };
-         p->setPosition(strToVectorf(pos));
+         p->setPosition(strToVectorf(move));
          p->setFillColor(sf::Color(255, 0, 0, 120));
          window->draw(*p);
       }
    }
-
-   bool isThereSpriteAt(const vector<sf::Sprite> &sprites, const sf::Vector2f &pos) {
-      for (auto& sprite: sprites) {
-         if (sprite.getGlobalBounds().contains(pos)) {
-            return true;
-         }
-      }
-      return false;
-   }
-
    void loadTextures(vector< sf::Texture > &textureList) {
       //**
       //**********************************
@@ -113,13 +94,17 @@ namespace utils {
       //**
       //**********************************
 
+      textureList.clear();
+      textureList.reserve(12);
+
       for (unsigned i = 0u; i < 12u; i++) {
+         textureList.emplace_back( sf::Texture() );
          textureList[i].loadFromFile(textures[i]);
       }
    }
 
-   unsigned getTextureIndex(const char &pieceType) {
-      unsigned int index{ 0u };
+   unsigned getTextureIndex(const char pieceType) {
+      unsigned int index{ invalidIndex };
       switch (pieceType){
          case 'K':
             index = wKing;
@@ -162,4 +147,17 @@ namespace utils {
       }
       return index;
    }
-}
+
+   void keepPieceInsideBoard(sf::Vector2f &pos) {
+      if (pos.x < (pieceSize / 2.f))
+         pos.x = (pieceSize / 2.f);
+      else if (pos.x > boardSize - (pieceSize / 2.f))
+         pos.x = boardSize - (pieceSize / 2.f);
+      if (pos.y < (pieceSize / 2.f))
+         pos.y = (pieceSize / 2.f);
+      else if (pos.y > boardSize - (pieceSize / 2.f))
+         pos.y = boardSize - (pieceSize / 2.f);
+   }
+
+
+} // utils namespace

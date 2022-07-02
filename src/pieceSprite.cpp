@@ -1,27 +1,37 @@
 #include "pieceSprite.hpp"
 
-PieceSprite::PieceSprite(const vector<sf::Texture> *textures, unsigned &pieceIndex, Chess::Board *board, sf::RenderWindow *window)
-:  textures{ textures }, sprite{ sf::Sprite() }, window{ window },
-   pieceIndex{ pieceIndex }, board{ board }, alive{ true },
-   pos{ (*board).pieces[pieceIndex]->pos }, pieceType{ (*board).pieces[pieceIndex]->type }
+// Copy constructor
+PieceSprite::PieceSprite(const PieceSprite& other)
+:  pieceIndex{ other.pieceIndex }, board{ other.board },
+   alive{ other.alive }, pos{ other.pos }, pieceType{ other.pieceType }, sprite{ sf::Sprite( *other.sprite.getTexture() ) },
+   textures{ other.textures }, window{ other.window }
 {
-   sprite.setScale(70/sprite.getGlobalBounds().width, 70/sprite.getGlobalBounds().height);
+   sprite.setPosition(other.sprite.getPosition());
+   sprite.setScale(utils::pieceSize/sprite.getGlobalBounds().width, utils::pieceSize/sprite.getGlobalBounds().height);
+}
+
+PieceSprite::PieceSprite(const vector<sf::Texture> *textures, const unsigned &pieceIndex, Chess::Board *board, sf::RenderWindow *window)
+:  pieceIndex{ pieceIndex },
+   board{ board }, alive{ true }, pos{ (*board).pieces[pieceIndex]->pos },
+   pieceType{ (*board).pieces[pieceIndex]->type }, sprite{ sf::Sprite() },
+   textures{ textures }, window{ window }
+{
+   sprite.setScale(
+      utils::pieceSize / sprite.getGlobalBounds().width,
+      utils::pieceSize / sprite.getGlobalBounds().height
+   );
+
    sprite.setPosition(utils::strToVectorf( pos ));
    // Set texture
    changeTexture();
 }
 
-PieceSprite::PieceSprite(const PieceSprite& other)
-: textures{ other.textures }, sprite{ sf::Sprite() }, window{ other.window }, pieceIndex{ other.pieceIndex },
-  board{ other.board }, alive{ other.alive }, pos{ other.pos }, pieceType{ other.pieceType }
-{
-   sprite.setTexture(*other.sprite.getTexture());
-   sprite.setPosition(other.sprite.getPosition());
-   sprite.setScale(70/sprite.getGlobalBounds().width, 70/sprite.getGlobalBounds().height);
-}
-
 void PieceSprite::move(const sf::Vector2f &pos) {
    sprite.setPosition(pos);
+}
+
+bool PieceSprite::isContainPos(const sf::Vector2f &pos) const {
+   return ( sprite.getGlobalBounds().contains( pos ) );
 }
 
 void PieceSprite::draw() {
@@ -31,16 +41,23 @@ void PieceSprite::draw() {
 }
 
 void PieceSprite::changeTexture() {
-   unsigned txtrIndex{ utils::getTextureIndex((*board).pieces[pieceIndex]->type) };
+   unsigned txtrIndex{ utils::getTextureIndex(pieceType) };
    sprite.setTexture((*textures)[txtrIndex]);
 }
 
 void PieceSprite::update() {
    // If corresponding piece is still alive
    if ( (*board).pieces[pieceIndex]->alive ) {
-      sprite.setPosition(utils::strToVectorf( (*board).pieces[pieceIndex]->pos ));
-      pos = (*board).pieces[pieceIndex]->pos;
-      alive = true;
+      // If piece's position changed
+      if (pos != (*board).pieces[pieceIndex]->pos) {
+         pos = (*board).pieces[pieceIndex]->pos;
+         // Move the sprite
+         sprite.setPosition(utils::strToVectorf( pos ));
+      }
+      if (!alive) {
+         alive = true;
+      }
+      // If a pieces is promoted
       if (pieceType != (*board).pieces[pieceIndex]->type) {
          pieceType = (*board).pieces[pieceIndex]->type;
          changeTexture();

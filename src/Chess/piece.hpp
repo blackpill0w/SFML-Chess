@@ -16,7 +16,8 @@ using std::cout;
 namespace Chess
 {
 
-enum PieceColor {NONE = 0, BLACK, WHITE};
+enum PieceColor : unsigned {NONE = 0u, BLACK, WHITE};
+using Turn = PieceColor;
 
 class Piece {
 
@@ -28,8 +29,9 @@ public:
    bool hasMoved;
    vector<string> legalMoves;
    const vector< unique_ptr<Piece> > *pieces;
-   const PieceColor *turn;
+   const Turn *turn;
    bool isProtected;
+   const string initialPos;
    // NOTE: Only for pawns
    string attackingPositions[2];
    bool enPassant;
@@ -39,7 +41,7 @@ public:
    unsigned longCastleRookIndex{ 65u };
    bool inCheck;
 public:
-   Piece(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
+   Piece(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos);
 
 
    // Just to make the compiler's warnings disappear
@@ -74,6 +76,13 @@ public:
    //**
    //********************************************
    bool canPosBeAttacked(const string &pos, const PieceColor &color);
+
+   //********************************************
+   //**
+   //** Return to initial state
+   //**
+   //********************************************
+   void reset();
 
    // Overridden for 'Pawn' and 'King'
    virtual void update();

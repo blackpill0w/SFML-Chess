@@ -1,6 +1,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include <cstdint>
 #include <filesystem>
 #include <memory>
 #include <algorithm>
@@ -14,12 +15,11 @@ using std::unique_ptr;
 using std::make_unique;
 using std::string;
 using std::vector;
-using std::array;
 using std::find;
 
 namespace Chess
 {
-enum GameState {
+enum GameState : unsigned {
    MoveFailed, Moved,
    MoveAndCapture, MoveAndCastle,
    Check, CheckMate, Draw
@@ -77,7 +77,7 @@ public:
    //** Color of the pieces to play.
    //**
    //********************************************
-   PieceColor turn;
+   Turn turn;
 
    //********************************************
    //**
@@ -106,6 +106,13 @@ protected:
    //**
    //********************************************
    unsigned possibleMoves;
+
+   //********************************************
+   //**
+   //** Number of pieces at the beginning of the game.
+   //**
+   //********************************************
+   unsigned initialPiecesNum;
 public:
    //********************************************
    //**
@@ -113,7 +120,7 @@ public:
    //** parameter to load an FEN string.
    //**
    //********************************************
-   Board(const string &fenStr = "");
+   Board(const string &fenStr = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
 
    //********************************************
    //**
@@ -135,7 +142,7 @@ public:
    //** the piece to be moved is deduced from the 'from' var.
    //**
    //********************************************
-   void move(const string &from, const string &to, const char &pieceToPromoteTo = 0);
+   void move(const string &from, const string &to, const char pieceToPromoteTo = 0);
 
    //********************************************
    //**
@@ -166,6 +173,13 @@ public:
    //**
    //********************************************
    unsigned getNumberOfPossibleMoves();
+
+   //********************************************
+   //**
+   //** Put board in initial state.
+   //**
+   //********************************************
+   void reset();
 
 protected:
    //********************************************
@@ -230,7 +244,7 @@ protected:
    //** Check if the move made was a pawn promotion.
    //**
    //********************************************
-   void checkPromoting(const unsigned &movingPieceIndex, const char &pieceToPromoteTo, MoveData &move);
+   void checkPromoting(const unsigned &movingPieceIndex, const char pieceToPromoteTo, MoveData &move);
 
    //********************************************
    //**

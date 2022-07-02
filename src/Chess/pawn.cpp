@@ -3,7 +3,7 @@
 namespace Chess
 {
 
-Pawn::Pawn(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos)
+Pawn::Pawn(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos)
 : Piece(pieces, turn, type, pos)
 {
 }
@@ -63,12 +63,12 @@ void Pawn::checkEnPassant() {
                // AtattackingPositions are positions where the pawn is attacking a piece,
                // which is the same as en passant
                if (!isEnPassantResultsInCheck()) {
-                  legalMoves.push_back(attackingPositions[0]);
+                  legalMoves.emplace_back(attackingPositions[0]);
                }
             }
             else if (piece->pos == EPpos2) {
                if (!isEnPassantResultsInCheck()) {
-                  legalMoves.push_back(attackingPositions[1]);
+                  legalMoves.emplace_back(attackingPositions[1]);
                }
             }
          }
@@ -84,20 +84,20 @@ void Pawn::setLegalMoves() {
    string inFront{ pos[0] };
    inFront += (pos[1] + pawnMovementDirection);
    if (!isPosOccupied(inFront)) {
-      legalMoves.push_back(inFront);
+      legalMoves.emplace_back(inFront);
       // Two squares forward
       if (!hasMoved) {
          string twoSteps{ inFront };
          twoSteps[1] += pawnMovementDirection;
          if (isPosOccupied(twoSteps) == NONE ) {
-            legalMoves.push_back(twoSteps);
+            legalMoves.emplace_back(twoSteps);
          }
       }
    }
    for (auto& position: attackingPositions){
       PieceColor occupyingPiece{ isPosOccupied(position) };
       if (occupyingPiece != NONE && occupyingPiece != color) {
-         legalMoves.push_back(position);
+         legalMoves.emplace_back(position);
       }
       else {
          for (auto& piece: *pieces) {

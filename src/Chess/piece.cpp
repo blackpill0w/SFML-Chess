@@ -6,21 +6,21 @@ namespace Chess
 Piece::Piece(const Piece& other)
 : type{ other.type }, color{ other.color }, alive{ true }, pos{ other.pos },
   hasMoved{ other.hasMoved }, legalMoves{ "" }, pieces{ other.pieces }, turn{ other.turn }, isProtected{ other.isProtected },
-  enPassant{ other.enPassant }, pawnMovementDirection{ other.pawnMovementDirection }, inCheck{ other.inCheck }
+  initialPos{ other.initialPos }, enPassant{ other.enPassant }, pawnMovementDirection{ other.pawnMovementDirection }, inCheck{ other.inCheck }
 {
    // legalMoves
    legalMoves.clear();
    for (auto& move: other.legalMoves) {
-      legalMoves.push_back(move);
+      legalMoves.emplace_back(move);
    }
    // Attacking Pos
    attackingPositions[0] = other.attackingPositions[0];
    attackingPositions[1] = other.attackingPositions[1];
 }
 
-Piece::Piece(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos)
+Piece::Piece(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos)
 : type{ type }, color{ BLACK }, alive{ true }, pos{ pos }, hasMoved{ false },
-  legalMoves{ "" }, pieces{ pieces }, turn{ turn }, isProtected{ false },
+  legalMoves{ "" }, pieces{ pieces }, turn{ turn }, isProtected{ false }, initialPos{ pos },
   enPassant{ false }, pawnMovementDirection{ 1 }, inCheck{ false }
 {
    if (isupper(type)) {
@@ -152,7 +152,7 @@ void Piece::setLegalMoves() {
          while (temp[0] >= 'a' && temp[0] <= 'h' && temp[1] >= '1' && temp[1] <= '8') {
             PieceColor pieceOccupyingColor{ isPosOccupied(temp) };
             if ( pieceOccupyingColor != color) {
-               legalMoves.push_back(temp);
+               legalMoves.emplace_back(temp);
                // If it's an enemy piece
                if (pieceOccupyingColor != NONE) {
                   break;
@@ -173,6 +173,11 @@ void Piece::setLegalMoves() {
          }
       }
    }
+}
+
+void Piece::reset() {
+   pos = initialPos;
+   alive = true;
 }
 
 //** Only for kings

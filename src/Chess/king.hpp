@@ -8,7 +8,7 @@ namespace Chess
 
 class King : public Piece {
 public:
-   King(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
+   King(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos);
    void setLegalMoves() override;
    void setRooksIndex() override;
    void shortCastle() override;

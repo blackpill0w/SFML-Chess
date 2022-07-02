@@ -5,16 +5,14 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <limits>
 
-#include "Chess/board.hpp"
+#include "../Chess/board.hpp"
 
-#include "pieceSprite.hpp"
-class PieceSprite;
+#include "sfmlColors.hpp"
+#include "button.hpp"
 
 using std::string;
 using std::vector;
-using std::unique_ptr;
 
 namespace utils {
 
@@ -52,6 +50,11 @@ namespace utils {
       castle, gameEnd
    };
 
+   // Server settings
+   extern const unsigned port;
+   extern const string startGameStr;
+   extern const string disconnectStr;
+
    //********************************************
    //**
    //** Given the mouse's position, it returns the top
@@ -78,27 +81,10 @@ namespace utils {
 
    //********************************************
    //**
-   //** Given a vector of (unique_ptr to) 'PieceSprite's,
-   //** return the index of the sprite at a given
-   //** position (sf::Vector2f).
-   //**
-   //********************************************
-   unsigned getSpriteIndexAt(const vector< unique_ptr<PieceSprite> > &sprites, const sf::Vector2f &pos);
-
-   //********************************************
-   //**
    //** Highlights the moves of a piece.
    //**
    //********************************************
-   void highlightMoves(sf::RenderWindow *window, Chess::Board *board, unsigned &pieceIndex);
-
-   //********************************************
-   //**
-   //** Checks wether there is a sprite at
-   //** a given position.
-   //**
-   //********************************************
-   bool isThereSpriteAt(const vector<sf::Sprite> &sprites, const sf::Vector2f &pos);
+   void highlightMoves(sf::RenderWindow *window, vector<string> &moves);
 
    //********************************************
    //**
@@ -120,7 +106,51 @@ namespace utils {
    //** on the piece's (the 'Piece' class) type
    //**
    //********************************************
-   unsigned getTextureIndex(const char &pieceType);
+   unsigned getTextureIndex(const char pieceType);
+
+   //********************************************
+   //**
+   //** Keeps a piece inside the board while being
+   //** dragged.
+   //**
+   //********************************************
+   void keepPieceInsideBoard(sf::Vector2f &pos);
+
+   //********************************************
+   //**
+   //** Given a vector of PieceSprite/OnlinePieceSprite,
+   //** return the index of the sprite at a given
+   //** position (sf::Vector2f).
+   //**
+   //********************************************
+   template<class T>
+   unsigned getSpriteIndexAt(const vector< T > &sprites, const sf::Vector2f &pos) {
+      unsigned index{ invalidIndex };
+      for (unsigned j=0 ; j < sprites.size(); j++ ) {
+         if (sprites[j].alive) {
+            if (sprites[j].isContainPos(pos)) {
+               index = j;
+               break;
+            }
+         }
+      }
+      return index;
+   };
+
+   //********************************************
+   //**
+   //** Draws a vector of PieceSprite/OnlinePieceSprite.
+   //**
+   //********************************************
+   template<class T>
+   void drawSprites(vector<T> &sprites, const unsigned &spritePressedIndex = invalidIndex) {
+      for (auto& sprite: sprites) {
+         sprite.draw();
+      }
+      if (spritePressedIndex != invalidIndex) {
+         sprites[spritePressedIndex].draw();
+      }
+   };
 }
 
 #endif

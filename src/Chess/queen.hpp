@@ -8,7 +8,7 @@ namespace Chess
 
 class Queen : public Piece {
 public:
-   Queen(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos);
+   Queen(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos);
 };
 
 }

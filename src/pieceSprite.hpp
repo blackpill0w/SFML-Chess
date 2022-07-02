@@ -3,15 +3,13 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <memory>
 #include <string>
 
 #include "Chess/board.hpp"
-#include "utils.hpp"
+#include "Utils/utils.hpp"
 
 using std::string;
 using std::vector;
-using std::unique_ptr;
 
 //********************************************
 //**
@@ -23,25 +21,26 @@ using std::unique_ptr;
 class PieceSprite {
 
 public:
-   const vector<sf::Texture> *textures;
-   sf::Sprite sprite;
-   sf::RenderWindow *window;
    unsigned pieceIndex;
    Chess::Board *board;
    bool alive;
    string pos;
    char pieceType;
+protected:
+   sf::Sprite sprite;
+   const vector<sf::Texture> *textures;
+   sf::RenderWindow *window;
 public:
-   PieceSprite(const vector<sf::Texture> *textures, unsigned &pieceIndex, Chess::Board *board, sf::RenderWindow *window);
+   PieceSprite(const vector<sf::Texture> *textures, const unsigned &pieceIndex, Chess::Board *board, sf::RenderWindow *window);
 
    PieceSprite(const PieceSprite& other);
    PieceSprite operator=(const PieceSprite& other) = delete;
 
-   void move(const sf::Vector2f &pos);
    void changeTexture();
    void draw();
+   void move(const sf::Vector2f &pos);
+   bool isContainPos(const sf::Vector2f &pos) const;
    void update();
-
 };
 
 #endif

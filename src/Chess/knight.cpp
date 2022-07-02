@@ -3,7 +3,7 @@
 namespace Chess
 {
 
-Knight::Knight(const vector< unique_ptr<Piece> > *pieces, PieceColor *turn, const char &type, const string &pos)
+Knight::Knight(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos)
 : Piece(pieces, turn, type, pos)
 {
 }
@@ -26,7 +26,7 @@ void Knight::setLegalMoves() {
 
       PieceColor occupyingColor{ isPosOccupied(temp) };
       if (occupyingColor != color) {
-         legalMoves.push_back(temp);
+         legalMoves.emplace_back(temp);
       }
       else {
          for (auto& piece: *pieces) {
