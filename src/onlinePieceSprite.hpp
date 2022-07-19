@@ -11,26 +11,27 @@ using std::string;
 
 class OnlinePieceSprite {
 public:
-   bool alive;
-   char pieceType;
-   string pos;
-   vector< string > legalMoves;
-   sf::Sprite sprite;
+  bool alive;
+  char pieceType;
+  string pos;
+  vector< string > legalMoves;
+  sf::Sprite sprite;
 protected:
-   sf::RenderWindow *window;
-   const vector<sf::Texture> *textures;
+  sf::RenderWindow *window;
+  const vector<sf::Texture> *textures;
 public:
-   OnlinePieceSprite(sf::RenderWindow *window, vector<sf::Texture> *textures);
+  OnlinePieceSprite(sf::RenderWindow *window, vector<sf::Texture> *textures);
 
-   OnlinePieceSprite(const OnlinePieceSprite &other);
-   OnlinePieceSprite operator=(const OnlinePieceSprite &other) = delete;
+  OnlinePieceSprite(const OnlinePieceSprite &other);
+  OnlinePieceSprite operator=(const OnlinePieceSprite &other) = delete;
 
-   void move(const sf::Vector2f &newPos);
-   bool isContainPos(const sf::Vector2f &pos) const;
-   void draw();
-   void update(const bool &isAlive, const char type, const string &pos, const vector<string> &legalMoves);
+  void move(const sf::Vector2f &newPos);
+  bool isContainPos(const sf::Vector2f &pos) const;
+  bool isValidMove(string &move) const;
+  void draw();
+  void update(const bool &isAlive, const char type, const string &pos, const vector<string> &legalMoves);
 protected:
-   void changeTexture();
+  void changeTexture();
 };
 
 #endif

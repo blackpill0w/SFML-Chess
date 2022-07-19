@@ -125,16 +125,16 @@ namespace utils {
    //********************************************
    template<class T>
    unsigned getSpriteIndexAt(const vector< T > &sprites, const sf::Vector2f &pos) {
-      unsigned index{ invalidIndex };
-      for (unsigned j=0 ; j < sprites.size(); j++ ) {
-         if (sprites[j].alive) {
-            if (sprites[j].isContainPos(pos)) {
-               index = j;
-               break;
-            }
+     unsigned index{ invalidIndex };
+     for (unsigned j=0 ; j < sprites.size(); j++ ) {
+       if (sprites[j].alive) {
+         if (sprites[j].isContainPos(pos)) {
+           index = j;
+           break;
          }
-      }
-      return index;
+       }
+     }
+     return index;
    };
 
    //********************************************
@@ -151,6 +151,124 @@ namespace utils {
          sprites[spritePressedIndex].draw();
       }
    };
+
+
+  template <class T>
+  char getPieceToPromoteTo(
+      sf::RenderWindow *window,
+      sf::Sprite &boardSprite,
+      vector< T > *sprites,
+      const unsigned &pieceToBePromotedIndex
+  ) {
+    char piece{ 0 };
+    // Get mouse's position
+    sf::Vector2f mousePos;
+
+    sf::Vector2f rectSize(utils::boardSize - 200.f, 100.f);
+
+    sf::RectangleShape rects[4] = {
+      sf::RectangleShape(rectSize),
+      sf::RectangleShape(rectSize),
+      sf::RectangleShape(rectSize),
+      sf::RectangleShape(rectSize)
+    };
+    sf::Font font;
+    font.loadFromFile(utils::fontFile);
+    sf::Text texts[4] = {
+      sf::Text("Queen", font),
+      sf::Text("Rook", font),
+      sf::Text("Bishop", font),
+      sf::Text("Knight", font)
+    };
+
+    for (int i=0; i<4; i++) {
+      sf::Vector2f pos(100.f, i*110.f + 80.f);
+      rects[i].setFillColor(sf::Color(0u, 0u, 0u, 255u));
+      rects[i].setPosition(pos);
+      texts[i].setFillColor(sf::Color(255u, 255u, 255u, 255u));
+      pos.x += (rects[i].getSize().x / 2.f) - (texts[i].getGlobalBounds().width / 2.f);
+      pos.y += 30.f;
+      texts[i].setPosition(pos);
+    }
+
+    while (piece == 0 && window->isOpen()) {
+      sf::Event event;
+
+      while (window->pollEvent(event)) {
+        if (event.type == sf::Event::Closed) {
+          window->close();
+          return 0;
+        }
+        if (event.type == sf::Event::MouseButtonPressed) {
+          for (int i=0; i < 4; i++) {
+            if ( rects[i].getGlobalBounds().contains( mousePos )) {
+              switch (i) {
+              case 0:
+                piece = 'q';
+                break;
+              case 1:
+                piece = 'r';
+                break;
+              case 2:
+                piece = 'b';
+                break;
+              case 3:
+                piece = 'n';
+                break;
+              }
+              // Break from the for loop
+              break;
+            }
+          }
+        }
+      }
+
+      // Get mouse's position
+      mousePos = sf::Vector2f( sf::Mouse::getPosition(*window) );
+
+      window->clear();
+
+      for (int i=0; i < 4; i++) {
+        if ( rects[i].getGlobalBounds().contains( mousePos )) {
+          rects[i].setFillColor(sf::Color(45u, 25u, 52u, 255u));
+        }
+        else {
+          rects[i].setFillColor(sf::Color(0u, 0u, 0u, 255u));
+        }
+      }
+
+      window->draw(boardSprite);
+      // Draw pieces
+      utils::drawSprites(*sprites);
+      // Draw promotion menu
+      for (int i=0; i<4; i++) {
+        window->draw(rects[i]);
+        window->draw(texts[i]);
+      }
+
+      window->display();
+    }
+    // Match case of the choice with the piece (make them have the same color)
+    if ( isupper( (*sprites)[pieceToBePromotedIndex].pieceType ) ) {
+      piece = toupper(piece);
+    }
+    return piece;
+  }
+
+  template <class T>
+  char checkPromotion(
+    sf::RenderWindow *window,
+    vector< T > &sprites,
+    sf::Sprite &boardSprite,
+    unsigned &spritePressedIndex,
+    string &to
+  ) {
+    if ( tolower(sprites[spritePressedIndex].pieceType) == 'p' && (to[1] == '1' || to[1] == '8')) {
+     // Get the type of piece to promote to
+      return getPieceToPromoteTo<T>(window, boardSprite, &sprites, spritePressedIndex);
+   }
+   return 'q';
+  }
 }
 
 #endif

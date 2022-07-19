@@ -86,7 +86,9 @@ void onlineGame(sf::RenderWindow &window) {
             mouseReleased = false;
             to = utils::posToStr(mousePos);
 
-            // TODO: handle promotion
+            if (sprites[spritePressedIndex].isValidMove(to)) {
+              pieceToPromoteTo = utils::checkPromotion(&window, sprites, boardSprite, spritePressedIndex, to);
+            }
 
             sendMove(client, from, to, pieceToPromoteTo, dataPacket);
             spritePressedIndex = utils::invalidIndex;

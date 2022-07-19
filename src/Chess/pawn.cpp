@@ -15,7 +15,7 @@ bool Pawn::isEnPassantResultsInCheck() {
    //** being attacked.
    //** ex: Q - - P p - k -
    //** If en passant happens, both pawns move
-   //** and the queen is able to take the king.
+   //** and the queen are able to take the king.
    //**
    //********************************************
 

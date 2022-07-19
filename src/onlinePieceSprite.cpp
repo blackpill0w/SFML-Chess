@@ -30,6 +30,15 @@ bool OnlinePieceSprite::isContainPos(const sf::Vector2f &pos) const {
    return ( sprite.getGlobalBounds().contains( pos ) );
 }
 
+bool OnlinePieceSprite::isValidMove(string &move) const {
+  for (auto& m: legalMoves) {
+    if (m == move) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void OnlinePieceSprite::draw() {
    if (alive) {
       window->draw(sprite);
@@ -62,4 +71,3 @@ void OnlinePieceSprite::changeTexture() {
       sprite.setTexture( (*textures)[txtrIndex] );
    }
 }
-
