@@ -1,21 +1,16 @@
-#ifndef BOARD_H
-#define BOARD_H
+#ifndef BOARD_HPP
+#define BOARD_HPP
 
-#include <cstdint>
-#include <filesystem>
-#include <memory>
-#include <algorithm>
 #include <iostream>
 #include <vector>
+#include <memory>
+#include <algorithm>
 
 #include "pieces.hpp"
 
-using std::cout;
-using std::unique_ptr;
-using std::make_unique;
 using std::string;
 using std::vector;
-using std::find;
+using std::unique_ptr;
 
 namespace Chess
 {
@@ -24,6 +19,13 @@ enum GameState : unsigned {
    MoveAndCapture, MoveAndCastle,
    Check, CheckMate, Draw
 };
+
+//**
+//********************************************
+//**
+//** A class to store a move's data.
+//**
+//********************************************
 
 class MoveData {
 public:
@@ -36,7 +38,7 @@ public:
   bool pieceHasMovedChanged{ false };
   bool isPromotion{ false };
 public:
-bool operator==(const MoveData &other) {
+bool operator==(const MoveData &other) const {
    return (
       oldPos == other.oldPos
       && newPos == other.newPos
@@ -95,8 +97,8 @@ protected:
    unsigned bKingIndex;
    //********************************************
    //**
-   //** A vector of struct (see definition above)
-   //** It is used to save data about moves to undo them.
+   //** It is used to save data about moves in order
+   //** to implement the undo functionality.
    //**
    //********************************************
    vector< MoveData > moveList;
@@ -113,6 +115,12 @@ protected:
    //**
    //********************************************
    unsigned initialPiecesNum;
+   //********************************************
+   //**
+   //** Counter for the fifty move rule.
+   //**
+   //********************************************
+   unsigned fiftyMoveRuleCounter;
 public:
    //********************************************
    //**
@@ -121,13 +129,6 @@ public:
    //**
    //********************************************
    Board(const string &fenStr = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-
-   //********************************************
-   //**
-   //** The copy constructor.
-   //**
-   //********************************************
-   Board(const Board &other);
 
    //********************************************
    //**

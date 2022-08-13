@@ -74,10 +74,10 @@ namespace utils {
 
    void highlightMoves(sf::RenderWindow *window, vector<string> &moves) {
       for (auto& move: moves) {
-         unique_ptr< sf::RectangleShape > p{ make_unique< sf::RectangleShape >(sf::RectangleShape({70, 70})) };
-         p->setPosition(strToVectorf(move));
-         p->setFillColor(sf::Color(255, 0, 0, 120));
-         window->draw(*p);
+         sf::RectangleShape p{ sf::RectangleShape({70, 70}) };
+         p.setPosition(strToVectorf(move));
+         p.setFillColor(sf::Color(255, 0, 0, 120));
+         window->draw(p);
       }
    }
    void loadTextures(vector< sf::Texture > &textureList) {

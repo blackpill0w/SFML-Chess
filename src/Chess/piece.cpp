@@ -1,22 +1,9 @@
 #include "piece.hpp"
 
+using std::find;
+
 namespace Chess
 {
-
-Piece::Piece(const Piece& other)
-: type{ other.type }, color{ other.color }, alive{ true }, pos{ other.pos },
-  hasMoved{ other.hasMoved }, legalMoves{ "" }, pieces{ other.pieces }, turn{ other.turn }, isProtected{ other.isProtected },
-  initialPos{ other.initialPos }, enPassant{ other.enPassant }, pawnMovementDirection{ other.pawnMovementDirection }, inCheck{ other.inCheck }
-{
-   // legalMoves
-   legalMoves.clear();
-   for (auto& move: other.legalMoves) {
-      legalMoves.emplace_back(move);
-   }
-   // Attacking Pos
-   attackingPositions[0] = other.attackingPositions[0];
-   attackingPositions[1] = other.attackingPositions[1];
-}
 
 Piece::Piece(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos)
 : type{ type }, color{ BLACK }, alive{ true }, pos{ pos }, hasMoved{ false },

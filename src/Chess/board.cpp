@@ -1,12 +1,16 @@
 #include "board.hpp"
 
+using std::find;
+using std::make_unique;
+using std::cout;
+
 namespace Chess
 {
 
-Board::Board( const string &fenStr ) :
+Board::Board( const string &fenStr ):
    pieces{}, turn{ WHITE }, gameState{ MoveFailed },
    wKingIndex{ 0u }, bKingIndex{ 0u }, moveList{},
-   possibleMoves{ 0u }, initialPiecesNum{ 0u }
+   possibleMoves{ 0u }, initialPiecesNum{ 0u }, fiftyMoveRuleCounter{ 0u }
 {
    if (fenStr != "") {
       loadFEN(fenStr);
@@ -16,34 +20,6 @@ Board::Board( const string &fenStr ) :
    initialPiecesNum = pieces.size();
    // Calculate pieces' moves
    this->update();
-}
-
-Board::Board(const Board &other):
-   pieces{}, turn{ other.turn }, gameState{ other.gameState },
-   wKingIndex{ other.wKingIndex }, bKingIndex{ other.bKingIndex },
-   moveList{ other.moveList }, possibleMoves{ other.possibleMoves }, initialPiecesNum{ other.initialPiecesNum }
-{
-   // Copy the pieces
-   for (unsigned i=0; i < other.pieces.size(); i++) {
-      if (tolower(other.pieces[i]->type) == 'k') {
-         pieces.emplace_back( make_unique<King>( King(&pieces, &turn, other.pieces[i]->type, other.pieces[i]->pos) ) );
-      }
-      else if (tolower(other.pieces[i]->type) == 'q') {
-         pieces.emplace_back( make_unique<Queen>( Queen(&pieces, &turn, other.pieces[i]->type, other.pieces[i]->pos) ) );
-      }
-      else if (tolower(other.pieces[i]->type) == 'r') {
-         pieces.emplace_back( make_unique<Rook>( Rook(&pieces, &turn, other.pieces[i]->type, other.pieces[i]->pos) ) );
-      }
-      else if (tolower(other.pieces[i]->type) == 'b') {
-         pieces.emplace_back( make_unique<Bishop>( Bishop(&pieces, &turn, other.pieces[i]->type, other.pieces[i]->pos) ) );
-      }
-      else if (tolower(other.pieces[i]->type) == 'n') {
-         pieces.emplace_back( make_unique<Knight>( Knight(&pieces, &turn, other.pieces[i]->type, other.pieces[i]->pos) ) );
-      }
-      else if (tolower(other.pieces[i]->type) == 'p') {
-         pieces.emplace_back( make_unique<Pawn>( Pawn(&pieces, &turn, other.pieces[i]->type, other.pieces[i]->pos) ) );
-      }
-   }
 }
 
 void Board::loadFEN(const string &fenStr) {
@@ -283,12 +259,18 @@ void Board::move(const string &from, const string &to, const char pieceToPromote
 
          moveList.emplace_back(move);
          if (gameState == Moved || gameState == MoveAndCapture || gameState == MoveAndCastle || gameState == Check) {
-            // Recalculate pieces' moves
+            fiftyMoveRuleCounter++;
             update();
+         }
+         if (tolower(pieces[move.movingPieceIndex]->type) == 'p'
+             || move.takenPieceIndex != 65u
+             ) {
+           fiftyMoveRuleCounter = 0;
          }
          checkGameEnd();
       }
    }
+   std::cout << fiftyMoveRuleCounter << '\n';
 }
 
 void Board::checkGameEnd() {
@@ -306,6 +288,9 @@ void Board::checkGameEnd() {
    }
    else if (isDrawByRepitition()) {
       gameState = Draw;
+   }
+   else if (fiftyMoveRuleCounter == 100) {
+     gameState = Draw;
    }
 }
 

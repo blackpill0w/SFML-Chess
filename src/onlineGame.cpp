@@ -14,7 +14,6 @@ void onlineGame(sf::RenderWindow &window) {
    string color;
    client.receive(dataPacket);
    dataPacket >> color;
-   cout << color << '\n';
    if (color == "black") {
       myColor = Chess::BLACK;
    }
@@ -113,7 +112,6 @@ void checkBoardUpdate(sf::TcpSocket &client, vector<OnlinePieceSprite> &sprites,
    GameData temp;
    dataPacket >> temp;
    if (temp.piecesData.size() != 0) {
-     cout << "Received\n";
       updateSprites(temp, sprites);
       gameData = temp;
    }

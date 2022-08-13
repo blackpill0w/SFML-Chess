@@ -1,15 +1,14 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <SFML/Graphics.hpp>
 #include <vector>
-#include <memory>
 #include <string>
+#include <SFML/Graphics.hpp>
 
 #include "../Chess/board.hpp"
 
-#include "sfmlColors.hpp"
-#include "button.hpp"
+#include "./sfmlColors.hpp"
+#include "./button.hpp"
 
 using std::string;
 using std::vector;

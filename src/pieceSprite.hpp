@@ -14,7 +14,7 @@ using std::vector;
 //********************************************
 //**
 //** A class to connect the pieces from
-//** the 'Board' class and SFML sprites
+//** the 'Chess::Board' class and SFML sprites
 //**
 //********************************************
 

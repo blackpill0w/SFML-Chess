@@ -1,7 +1,6 @@
 #ifndef PIECE_HPP
 #define PIECE_HPP
 
-#include <iostream>
 #include <string>
 #include <vector>
 #include <memory>
@@ -10,8 +9,6 @@
 using std::unique_ptr;
 using std::vector;
 using std::string;
-using std::find;
-using std::cout;
 
 namespace Chess
 {
@@ -32,11 +29,11 @@ public:
    const Turn *turn;
    bool isProtected;
    const string initialPos;
-   // NOTE: Only for pawns
+   // NOTE: The following class members are used only with pawns
    string attackingPositions[2];
    bool enPassant;
    int pawnMovementDirection;
-   // NOTE: Only for king
+   // NOTE: The following class members are used only with kings
    unsigned shortCastleRookIndex{ 65u };
    unsigned longCastleRookIndex{ 65u };
    bool inCheck;
@@ -44,8 +41,8 @@ public:
    Piece(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos);
 
 
-   // Just to make the compiler's warnings disappear
-   Piece(const Piece& other);
+   // Because of the pointer class memeber
+   Piece(const Piece& other) = default;
    Piece operator=(const Piece& other) = delete;
    virtual ~Piece() {};
 
