@@ -4,6 +4,8 @@ using std::find;
 using std::make_unique;
 using std::cout;
 
+static constexpr unsigned invalidIndex{ 65u };
+
 namespace Chess
 {
 
@@ -73,15 +75,15 @@ void Board::loadFEN(const string &fenStr) {
                // Do nothing, just return
                cout << "Invalid FEN character: "<< c << '\n';
                cout << "quiting...\n";
+               // TODO: handle failure, this now causes segfault
                return;
-               break;
          }
       }
    }
 }
 
 unsigned Board::getIndexOfPieceAt(const string &pos, const PieceColor &colorToBeDifferentFrom, const bool &aliveState) {
-   unsigned pieceIndex{ 65u };
+   unsigned pieceIndex{ invalidIndex };
    for (unsigned i=0; i < pieces.size(); i++) {
       if (pieces[i]->alive == aliveState) {
          if (pieces[i]->pos == pos && pieces[i]->color != colorToBeDifferentFrom) {
@@ -138,11 +140,11 @@ void Board::checkDisableEnPassant() {
 }
 
 unsigned Board::checkIfMoveWasEnPassant(const unsigned &movingPieceIndex, const string &from, const string &to) {
-   unsigned pieceToBeRemoveIndex{ 65u };
+   unsigned pieceToBeRemoveIndex{ invalidIndex };
 
    if (tolower(pieces[movingPieceIndex]->type) == 'p' && to[0] != from[0]) {
       // Making the pos of piece being en-passant-ed (pawn to be taken)
-      //** y is 1 step the opposite way the moving (the pawn en-passant-ing) pawn moves
+      //** y is 1 step the opposite way of the moving pawn (the pawn en-passant-ing) direction
       string y{ pieces[movingPieceIndex]->pos[1] };
       y[0] -= pieces[movingPieceIndex]->pawnMovementDirection;
 
@@ -161,17 +163,17 @@ unsigned Board::checkIfMoveWasEnPassant(const unsigned &movingPieceIndex, const 
 }
 
 void Board::checkTaking(const unsigned &movingPieceIndex, const string &from, const string &to, MoveData &move) {
-   unsigned pieceToBeRemoveIndex{ 65u };
+   unsigned pieceToBeRemoveIndex{ invalidIndex };
    pieceToBeRemoveIndex = getIndexOfPieceAt(pieces[movingPieceIndex]->pos, pieces[movingPieceIndex]->color);
 
    //** Check en passant
-   if (pieceToBeRemoveIndex == 65u) {
+   if (pieceToBeRemoveIndex == invalidIndex) {
       pieceToBeRemoveIndex = checkIfMoveWasEnPassant(movingPieceIndex, from, to);
-      if (pieceToBeRemoveIndex != 65u) {
+      if (pieceToBeRemoveIndex != invalidIndex) {
          move.isMoveEnPassant = true;
       }
    }
-   if (pieceToBeRemoveIndex != 65u) {
+   if (pieceToBeRemoveIndex != invalidIndex) {
       removePiece(pieceToBeRemoveIndex);
       move.takenPieceIndex = pieceToBeRemoveIndex;
    }
@@ -209,11 +211,11 @@ void Board::checkPromoting(const unsigned &movingPieceIndex, const char pieceToP
 void Board::move(const string &from, const string &to, const char pieceToPromoteTo) {
    if (gameState != CheckMate && gameState != Draw) {
       gameState = MoveFailed;
-      unsigned movingPieceIndex{ 65u }; // More than a chess board can contain
+      unsigned movingPieceIndex{ invalidIndex };
 
       movingPieceIndex = getIndexOfPieceAt(from);
       // If there is no piece at the 'from' position, return
-      if (movingPieceIndex == 65u) {
+      if (movingPieceIndex == invalidIndex) {
          return;
       }
 
@@ -223,6 +225,7 @@ void Board::move(const string &from, const string &to, const char pieceToPromote
          move.movingPieceIndex = movingPieceIndex;
          move.oldPos = from;
          move.newPos = to;
+         move.previousFiftyMoveRule = fiftyMoveRuleCounter;
 
          // Moved successfully
          gameState = Moved;
@@ -242,7 +245,7 @@ void Board::move(const string &from, const string &to, const char pieceToPromote
 
             //** Take piece is there is any
             checkTaking(movingPieceIndex, from, to, move);
-            if (move.takenPieceIndex != 65u) {
+            if (move.takenPieceIndex != invalidIndex) {
                gameState = MoveAndCapture;
             }
          }
@@ -263,7 +266,7 @@ void Board::move(const string &from, const string &to, const char pieceToPromote
             update();
          }
          if (tolower(pieces[move.movingPieceIndex]->type) == 'p'
-             || move.takenPieceIndex != 65u
+             || move.takenPieceIndex != invalidIndex
              ) {
            fiftyMoveRuleCounter = 0;
          }
@@ -319,9 +322,10 @@ void Board::update() {
 void Board::undoLastMove() {
    if ( !moveList.empty() ) {
       MoveData lastMove = { moveList[moveList.size() - 1u] };
+      fiftyMoveRuleCounter = lastMove.previousFiftyMoveRule;
       // Type of pawn if move was a promotion
       char type{ 'P' };
-      if (lastMove.takenPieceIndex != 65u) {
+      if (lastMove.takenPieceIndex != invalidIndex) {
          pieces[lastMove.takenPieceIndex]->alive = true;
       }
       if (islower(pieces[lastMove.movingPieceIndex]->type)) {
@@ -419,12 +423,12 @@ void Board::handlePins() {
       temp[1] += directions[i][1];
 
       bool checkingForPinnedPiece{ true };
-      unsigned pinnedPieceIndex{ 65u };
+      unsigned pinnedPieceIndex{ invalidIndex };
 
       while (temp[0] != ('h'+1) && temp[0] != ('a'-1) && temp[1] != '0' && temp[1] != '9') {
          unsigned pieceIndex = getIndexOfPieceAt(temp);
 
-         if (pieceIndex != 65u) {
+         if (pieceIndex != invalidIndex) {
             if (checkingForPinnedPiece) { // Looking for a piece to pin
                if (pieces[pieceIndex]->color == pieces[kingIndex]->color) {
                   pinnedPieceIndex = pieceIndex;
@@ -486,7 +490,7 @@ void Board::handleSlidingPiecesChecks() {
 
       while (temp[0] != ('h'+1) && temp[0] != ('a'-1) && temp[1] != '0' && temp[1] != '9') {
          unsigned pieceIndex = getIndexOfPieceAt(temp);
-         if (pieceIndex != 65u) {
+         if (pieceIndex != invalidIndex) {
             if (pieces[pieceIndex]->color != pieces[kingIndex]->color) {
                // The first 4 directions are horizontal and vertical
                // The other 4 are diagonals

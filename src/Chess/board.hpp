@@ -37,6 +37,7 @@ public:
   bool isMoveCastle{ false };
   bool pieceHasMovedChanged{ false };
   bool isPromotion{ false };
+  unsigned previousFiftyMoveRule{ 0 };
 public:
 bool operator==(const MoveData &other) const {
    return (
