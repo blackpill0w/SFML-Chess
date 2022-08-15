@@ -73,10 +73,10 @@ void Board::loadFEN(const string &fenStr) {
                break;
             default:
                // Do nothing, just return
+              cout << "In: " << fenStr << '\n';
                cout << "Invalid FEN character: "<< c << '\n';
-               cout << "quiting...\n";
-               // TODO: handle failure, this now causes segfault
-               return;
+               cout << "Quiting...\n";
+               exit(1);
          }
       }
    }
@@ -323,7 +323,7 @@ void Board::undoLastMove() {
    if ( !moveList.empty() ) {
       MoveData lastMove = { moveList[moveList.size() - 1u] };
       fiftyMoveRuleCounter = lastMove.previousFiftyMoveRule;
-      // Type of pawn if move was a promotion
+      // Color of pawn if move was a promotion
       char type{ 'P' };
       if (lastMove.takenPieceIndex != invalidIndex) {
          pieces[lastMove.takenPieceIndex]->alive = true;
@@ -335,10 +335,8 @@ void Board::undoLastMove() {
       if (lastMove.isPromotion) {
          pieces[lastMove.movingPieceIndex].reset(new Pawn(&pieces, &turn, type, lastMove.oldPos));
       }
-      // If move was not a promotion
       else {
          pieces[lastMove.movingPieceIndex]->pos = lastMove.oldPos;
-         // Check if the class member 'hasMoved' changed
          if (lastMove.pieceHasMovedChanged) {
             pieces[lastMove.movingPieceIndex]->hasMoved = false;
          }
