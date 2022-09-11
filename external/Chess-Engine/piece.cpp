@@ -7,8 +7,10 @@ namespace Chess
 
 Piece::Piece(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos)
 : type{ type }, color{ BLACK }, alive{ true }, pos{ pos }, hasMoved{ false },
-  legalMoves{ "" }, pieces{ pieces }, turn{ turn }, isProtected{ false }, initialPos{ pos },
-  enPassant{ false }, pawnMovementDirection{ 1 }, inCheck{ false }
+  legalMoves{ "" }, pieces{ pieces },
+  turn{ turn }, isProtected{ false }, initialPos{ pos },
+  enPassant{ false }, pawnMovementDirection{ 1 }, inCheck{ false },
+  canShortCastle{ false }, canLongCastle{ false }
 {
    if (isupper(type)) {
       this->color = WHITE;

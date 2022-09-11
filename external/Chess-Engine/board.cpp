@@ -1,8 +1,9 @@
 #include "board.hpp"
 
+#include <algorithm>
+#include <memory>
+
 using std::find;
-using std::make_unique;
-using std::cout;
 
 static constexpr unsigned invalidIndex{ 65u };
 
@@ -22,64 +23,6 @@ Board::Board( const string &fenStr ):
    initialPiecesNum = pieces.size();
    // Calculate pieces' moves
    this->update();
-}
-
-void Board::loadFEN(const string &fenStr) {
-   if ( !pieces.empty() ) {
-      pieces.clear();
-   }
-   enum { wKingSide = 0, wQueenSide, bKingSide, bQueenSide };
-
-   string x{ "a" };
-   string y{ "8" };
-
-   for (auto& c: fenStr) {
-      if (c == '/') {
-         x = "a";
-         y[0] -= 1;
-      }
-      else if (isdigit(c)) {
-         x[0] += ( (c - '1') + 1 );
-      }
-      // Placing pieces
-      else {
-         string pos{ x+y };
-         x[0] += 1;
-         switch (tolower(c)) {
-            case 'k':
-               pieces.emplace_back( make_unique< King >( King(&pieces, &turn, c, pos) ) );
-               // Save kings' indices
-               if (isupper(c)) {
-                  wKingIndex = pieces.size() - 1;
-               }
-               else {
-                  bKingIndex = pieces.size() - 1;
-               }
-               break;
-            case 'q':
-               pieces.emplace_back( make_unique< Queen >( Queen(&pieces, &turn, c, pos) ) );
-               break;
-            case 'r':
-               pieces.emplace_back( make_unique< Rook >( Rook(&pieces, &turn, c, pos) ) );
-               break;
-            case 'b':
-               pieces.emplace_back( make_unique< Bishop >( Bishop(&pieces, &turn, c, pos) ) );
-               break;
-            case 'n':
-               pieces.emplace_back( make_unique< Knight >( Knight(&pieces, &turn, c, pos) ) );
-               break;
-            case 'p':
-               pieces.emplace_back( make_unique< Pawn >( Pawn(&pieces, &turn, c, pos) ) );
-               break;
-            default:
-               // Do nothing, just return
-              cout << "In: " << fenStr << '\n';
-               cout << "Invalid FEN character: "<< c << '\n';
-               cout << "Quiting...\n";
-               exit(1);
-         }
-      }
-   }
 }
 
 unsigned Board::getIndexOfPieceAt(const string &pos, const PieceColor &colorToBeDifferentFrom, const bool &aliveState) {
@@ -273,7 +216,6 @@ void Board::move(const string &from, const string &to, const char pieceToPromote
          checkGameEnd();
       }
    }
-   std::cout << fiftyMoveRuleCounter << '\n';
 }
 
 void Board::checkGameEnd() {

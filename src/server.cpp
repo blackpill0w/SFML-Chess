@@ -1,7 +1,10 @@
-#include "server.hpp"
-#include <SFML/Network/Socket.hpp>
+#include "./server.hpp"
+#include "./gameData.hpp"
+#include "./utils.hpp"
+#include <iostream>
 
 using std::cout;
+using std::cerr;
 using std::string;
 
 int main() {
@@ -49,7 +52,7 @@ void startServer() {
          break;
       }
       else if (s == sf::Socket::Error) {
-         cout << "Error\n";
+         cerr << "Error\n";
       }
       else if (s == sf::Socket::NotReady) {
          cout << "Not ready\n";
@@ -108,4 +111,3 @@ sf::Socket::Status receiveAndPlayMove(sf::TcpSocket &player, Chess::Board &board
    }
    return status;
 }
-

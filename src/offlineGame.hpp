@@ -4,19 +4,15 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 
-#include "Utils/utils.hpp"
-#include "pieceSprite.hpp"
-#include "Chess/board.hpp"
-#include "onlineGame.hpp"
+#include "./utils.hpp"
+#include "./pieceSprite.hpp"
+#include "./board.hpp"
 
 #include <string>
 #include <vector>
 #include <memory>
-#include <random>
 #include <iostream>
 
-using std::cout;
-using std::make_unique;
 using std::string;
 using std::vector;
 using std::unique_ptr;

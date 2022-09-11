@@ -1,4 +1,6 @@
-#include "offlineGame.hpp"
+#include "./offlineGame.hpp"
+
+#include <random>
 
 void offlineGame(sf::RenderWindow &window, const string &fenStr) {
    // Sound

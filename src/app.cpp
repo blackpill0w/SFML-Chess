@@ -1,4 +1,5 @@
-#include "app.hpp"
+#include "./app.hpp"
+#include <functional>
 
 void startApp() {
    sf::RenderWindow window(
@@ -12,13 +13,15 @@ void startApp() {
    sf::Font font;
    font.loadFromFile(utils::fontFile);
 
-   // Normal chess: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+   // Normal chess: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
    // For testing: "1r2kr2/pp1p1p2/2p4p/6pP/P1PP4/1P6/5PP1/R3K2R w KQ g6"
-   const std::function<void()> offline( [&]() { offlineGame(window, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");} );
+   const std::function<void()> offline( [&]() {
+      offlineGame(window, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");}
+   );
    const std::function<void()> online( [&]() { onlineGame(window);} );
 
    utils::Button offlineGameButton(sf::Vector2f(200.f, 200.f), "Offline", &font, offline);
-   utils::Button onlineGameButton(sf::Vector2f(200.f, 250.f), "Online", &font, online);
+   utils::Button onlineGameButton(sf::Vector2f(207.f, 250.f), "Online", &font, online);
 
    bool mouseClicked{ false };
    while (window.isOpen()) {

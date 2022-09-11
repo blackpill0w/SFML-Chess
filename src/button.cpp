@@ -1,4 +1,4 @@
-#include "button.hpp"
+#include "./button.hpp"
 
 namespace utils {
    Button::Button(const sf::Vector2f &pos, const string &text, sf::Font *font, const function< void() > &funcToRun)

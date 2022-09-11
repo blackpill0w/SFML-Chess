@@ -1,15 +1,14 @@
 #ifndef ONLINE_GAME_HPP
 #define ONLINE_GAME_HPP
 
-#include <iostream>
 #include <vector>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 
-#include "onlinePieceSprite.hpp"
-#include "gameData.hpp"
-#include "Utils/utils.hpp"
+#include "./onlinePieceSprite.hpp"
+#include "./gameData.hpp"
+#include "./utils.hpp"
 
 using std::vector;
 using std::string;

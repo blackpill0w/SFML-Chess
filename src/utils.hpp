@@ -5,10 +5,7 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 
-#include "../Chess/board.hpp"
-
-#include "./sfmlColors.hpp"
-#include "./button.hpp"
+#include "./board.hpp"
 
 using std::string;
 using std::vector;

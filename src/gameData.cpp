@@ -1,4 +1,4 @@
-#include "gameData.hpp"
+#include "./gameData.hpp"
 
 //*******   PieceData   ********//
 

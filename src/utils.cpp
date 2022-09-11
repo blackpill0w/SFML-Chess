@@ -1,10 +1,4 @@
-#include "utils.hpp"
-
-// File seperators
-const string sep{ "/" };
-#ifdef _WIN32
-   sep = "\\"
-#endif
+#include "./utils.hpp"
 
 namespace utils {
 
@@ -20,7 +14,7 @@ namespace utils {
    extern const string fontFile{ "assets/fonts/UbuntuMono-R.ttf" };
    extern const string boardTexture{ "assets/img/chess-board.png" };
 
-   string texturesFolder{ "assets" + sep + "img" + sep + "pieces" + sep };
+   const string texturesFolder{ "./assets/img/pieces/" };
    string textures[12] = {
       texturesFolder + "wk.png",
       texturesFolder + "bk.png",
@@ -36,7 +30,7 @@ namespace utils {
       texturesFolder + "bp.png"
    };
 
-   string soundFilesFolder{ "assets" + sep + "sound_effects" + sep };
+   string soundFilesFolder{ "assets/sound_effects/" };
    string soundFiles[6] = {
       soundFilesFolder + "game-start.ogg",
       soundFilesFolder + "move.ogg",

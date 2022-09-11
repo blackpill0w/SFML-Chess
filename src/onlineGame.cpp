@@ -1,5 +1,5 @@
-#include "onlineGame.hpp"
-#include "Chess/piece.hpp"
+#include "./onlineGame.hpp"
+#include "./piece.hpp"
 
 using std::string;
 using std::vector;

@@ -1,4 +1,4 @@
-#include "onlinePieceSprite.hpp"
+#include "./onlinePieceSprite.hpp"
 
 OnlinePieceSprite::OnlinePieceSprite(sf::RenderWindow *window, vector<sf::Texture> *textures)
 :  alive(true), pieceType( 'q' ), pos( "a1" ), legalMoves(),

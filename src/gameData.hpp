@@ -4,8 +4,8 @@
 #include <memory>
 #include <SFML/Network.hpp>
 
-#include "Chess/board.hpp"
-#include "Utils/utils.hpp"
+#include "./board.hpp"
+#include "./utils.hpp"
 
 using std::string;
 using std::unique_ptr;

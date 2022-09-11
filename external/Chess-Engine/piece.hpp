@@ -13,33 +13,34 @@ using std::string;
 namespace Chess
 {
 
-enum PieceColor : unsigned {NONE = 0u, BLACK, WHITE};
+enum PieceColor : unsigned { NONE = 0u, BLACK, WHITE };
 using Turn = PieceColor;
 
 class Piece {
 
 public:
-   const char type;
-   PieceColor color;
-   bool alive;
-   string pos;
-   bool hasMoved;
+   const char     type;
+   PieceColor     color;
+   bool           alive;
+   string         pos;
+   bool           hasMoved;
    vector<string> legalMoves;
    const vector< unique_ptr<Piece> > *pieces;
-   const Turn *turn;
-   bool isProtected;
-   const string initialPos;
-   // NOTE: The following class members are used only with pawns
-   string attackingPositions[2];
-   bool enPassant;
-   int pawnMovementDirection;
-   // NOTE: The following class members are used only with kings
-   unsigned shortCastleRookIndex{ 65u };
-   unsigned longCastleRookIndex{ 65u };
-   bool inCheck;
+   const Turn     *turn;
+   bool           isProtected;
+   const string   initialPos;
+   // Note: The following class members are used only with pawns
+   string         attackingPositions[2];
+   bool           enPassant;
+   int            pawnMovementDirection;
+   // Note: The following class members are used only with kings
+   unsigned  shortCastleRookIndex{ 65u };
+   unsigned  longCastleRookIndex{ 65u };
+   bool      inCheck;
+	bool      canShortCastle;
+	bool      canLongCastle;
 public:
    Piece(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos);
-
 
    // Because of the pointer class memeber
    Piece(const Piece& other) = default;

@@ -5,8 +5,8 @@
 #include <vector>
 #include <string>
 
-#include "Chess/board.hpp"
-#include "Utils/utils.hpp"
+#include "board.hpp"
+#include "utils.hpp"
 
 using std::string;
 using std::vector;

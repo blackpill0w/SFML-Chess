@@ -4,8 +4,10 @@ namespace Chess
 {
 
 King::King(const vector< unique_ptr<Piece> > *pieces, Turn *turn, const char type, const string &pos)
-: Piece(pieces, turn, type, pos)
+	: Piece(pieces, turn, type, pos)
 {
+	canShortCastle = true;
+	canLongCastle = true;
 }
 
 void King::setRooksIndex() {
@@ -32,14 +34,14 @@ void King::checkCastle() {
 
    if ( shortCastleRookIndex != 65u && !(*pieces)[shortCastleRookIndex]->hasMoved ) {
       // f1/f8 && g1/g8 shouldn't be occupied
-      if (isPosOccupied("f"+y) == NONE && isPosOccupied("g"+y) == NONE) {
+      if (isPosOccupied("f"+y) == NONE && isPosOccupied("g"+y) == NONE && canShortCastle) {
          // Also not attacked
          if ( !( canPosBeAttacked("g"+y, color) || canPosBeAttacked("f"+y, color)) ) {
             legalMoves.emplace_back("g"+y);
          }
       }
    }
-   if ( shortCastleRookIndex != 65u && !(*pieces)[longCastleRookIndex]->hasMoved ) {
+   if ( shortCastleRookIndex != 65u && !(*pieces)[longCastleRookIndex]->hasMoved && canLongCastle ) {
       // b1/b8 && c1/c8 && d1/d8 shouldn't be occupied
       if (isPosOccupied("b"+y) == NONE && isPosOccupied("c"+y) == NONE && isPosOccupied("d"+y) == NONE) {
          // c1/c8 && d1/d8 souldn't be attacked
@@ -51,14 +53,12 @@ void King::checkCastle() {
 }
 
 void King::shortCastle() {
-   hasMoved = true;
    pos[0] = 'g';
    (*pieces)[shortCastleRookIndex]->pos[0] = 'f';
    (*pieces)[shortCastleRookIndex]->hasMoved = true;
 }
 
 void King::longCastle() {
-   hasMoved = true;
    pos[0] = 'c';
    (*pieces)[longCastleRookIndex]->pos[0] = 'd';
    (*pieces)[longCastleRookIndex]->hasMoved = true;

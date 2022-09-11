@@ -4,7 +4,7 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
-#include "Utils/utils.hpp"
+#include "./utils.hpp"
 
 using std::vector;
 using std::string;

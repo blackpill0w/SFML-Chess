@@ -1,12 +1,9 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <iostream>
 #include <SFML/Network.hpp>
 
-#include "Chess/board.hpp"
-#include "gameData.hpp"
-#include "Utils/utils.hpp"
+#include "./board.hpp"
 
 void startServer();
 
