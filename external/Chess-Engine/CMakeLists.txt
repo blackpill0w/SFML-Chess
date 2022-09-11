@@ -9,13 +9,13 @@ add_compile_options(-Wall -Wextra -pedantic)
 
 add_library(
   Chess-Engine SHARED
-  piece.cpp
-  king.cpp
-  queen.cpp
-  rook.cpp
-  bishop.cpp
-  knight.cpp
-  pawn.cpp
-  board_FEN.cpp
-  board.cpp
+  src/piece.cpp
+  src/king.cpp
+  src/queen.cpp
+  src/rook.cpp
+  src/bishop.cpp
+  src/knight.cpp
+  src/pawn.cpp
+  src/board_FEN.cpp
+  src/board.cpp
 )

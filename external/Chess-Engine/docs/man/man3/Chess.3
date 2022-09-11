@@ -1,0 +1,95 @@
+.TH "Chess" 3 "Sun Sep 11 2022" "Chess Engine" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Chess
+.SH SYNOPSIS
+.br
+.PP
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBBishop\fP"
+.br
+.ti -1c
+.RI "class \fBBoard\fP"
+.br
+.ti -1c
+.RI "class \fBKing\fP"
+.br
+.ti -1c
+.RI "class \fBKnight\fP"
+.br
+.ti -1c
+.RI "class \fBMoveData\fP"
+.br
+.ti -1c
+.RI "class \fBPawn\fP"
+.br
+.ti -1c
+.RI "class \fBPiece\fP"
+.br
+.ti -1c
+.RI "class \fBQueen\fP"
+.br
+.ti -1c
+.RI "class \fBRook\fP"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "using \fBTurn\fP = \fBPieceColor\fP"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBGameState\fP : unsigned { \fBMoveFailed\fP, \fBMoved\fP, \fBMoveAndCapture\fP, \fBMoveAndCastle\fP, \fBCheck\fP, \fBCheckMate\fP, \fBDraw\fP }"
+.br
+.ti -1c
+.RI "enum \fBPieceColor\fP : unsigned { \fBNONE\fP = 0u, \fBBLACK\fP, \fBWHITE\fP }"
+.br
+.in -1c
+.SH "Typedef Documentation"
+.PP 
+.SS "using \fBChess::Turn\fP = typedef \fBPieceColor\fP"
+
+.SH "Enumeration Type Documentation"
+.PP 
+.SS "enum \fBChess::GameState\fP : unsigned"
+TODO A class to store a game's state\&. 
+.PP
+\fBEnumerator\fP
+.in +1c
+.TP
+\fB\fIMoveFailed \fP\fP
+.TP
+\fB\fIMoved \fP\fP
+.TP
+\fB\fIMoveAndCapture \fP\fP
+.TP
+\fB\fIMoveAndCastle \fP\fP
+.TP
+\fB\fICheck \fP\fP
+.TP
+\fB\fICheckMate \fP\fP
+.TP
+\fB\fIDraw \fP\fP
+.SS "enum \fBChess::PieceColor\fP : unsigned"
+
+.PP
+\fBEnumerator\fP
+.in +1c
+.TP
+\fB\fINONE \fP\fP
+.TP
+\fB\fIBLACK \fP\fP
+.TP
+\fB\fIWHITE \fP\fP
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Chess Engine from the source code\&.

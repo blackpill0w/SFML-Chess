@@ -1,0 +1,42 @@
+.TH "src/board.hpp" 3 "Sun Sep 11 2022" "Chess Engine" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+src/board.hpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <vector>\fP
+.br
+\fC#include <memory>\fP
+.br
+\fC#include 'pieces\&.hpp'\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBChess::MoveData\fP"
+.br
+.ti -1c
+.RI "class \fBChess::Board\fP"
+.br
+.in -1c
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI "namespace \fBChess\fP"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBChess::GameState\fP : unsigned { \fBChess::MoveFailed\fP, \fBChess::Moved\fP, \fBChess::MoveAndCapture\fP, \fBChess::MoveAndCastle\fP, \fBChess::Check\fP, \fBChess::CheckMate\fP, \fBChess::Draw\fP }"
+.br
+.in -1c
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Chess Engine from the source code\&.

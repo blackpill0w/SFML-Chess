@@ -1,0 +1,333 @@
+.TH "Chess::Piece" 3 "Sun Sep 11 2022" "Chess Engine" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Chess::Piece
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <piece\&.hpp>\fP
+.PP
+Inherited by \fBChess::Bishop\fP, \fBChess::King\fP, \fBChess::Knight\fP, \fBChess::Pawn\fP, \fBChess::Queen\fP, and \fBChess::Rook\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBPiece\fP (const vector< unique_ptr< \fBPiece\fP > > *\fBpieces\fP, \fBTurn\fP *\fBturn\fP, const char \fBtype\fP, const string &\fBpos\fP)"
+.br
+.ti -1c
+.RI "\fBPiece\fP (const \fBPiece\fP &other)=default"
+.br
+.ti -1c
+.RI "\fBPiece\fP \fBoperator=\fP (const \fBPiece\fP &other)=delete"
+.br
+.ti -1c
+.RI "virtual \fB~Piece\fP ()"
+.br
+.ti -1c
+.RI "\fBPieceColor\fP \fBisPosOccupied\fP (const string &\fBpos\fP)"
+.br
+.ti -1c
+.RI "bool \fBisValidMove\fP (const string &move)"
+.br
+.RI "Checks wether a move is valid\&. "
+.ti -1c
+.RI "bool \fBcanPosBeAttacked\fP (const string &\fBpos\fP, const \fBPieceColor\fP &\fBcolor\fP)"
+.br
+.RI "Check whether a position can be attacked\&. "
+.ti -1c
+.RI "void \fBreset\fP ()"
+.br
+.RI "Return to initial state (as if the piece was just created)\&. "
+.ti -1c
+.RI "virtual void \fBupdate\fP ()"
+.br
+.RI "Overridden for '\fBPawn\fP'\&. "
+.ti -1c
+.RI "virtual void \fBshortCastle\fP ()"
+.br
+.RI "Handles king side castling, Kings only\&. "
+.ti -1c
+.RI "virtual void \fBlongCastle\fP ()"
+.br
+.RI "Handles queen side castling, Kings only\&. "
+.ti -1c
+.RI "virtual void \fBsetRooksIndex\fP ()"
+.br
+.RI "Save rooks indices, Kings only\&. "
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "const char \fBtype\fP"
+.br
+.RI "Type of the piece\&. "
+.ti -1c
+.RI "\fBPieceColor\fP \fBcolor\fP"
+.br
+.RI "Color of the piece\&. "
+.ti -1c
+.RI "bool \fBalive\fP"
+.br
+.RI "Whether the piece on the board\&. "
+.ti -1c
+.RI "string \fBpos\fP"
+.br
+.RI "Position of the piece\&. "
+.ti -1c
+.RI "bool \fBhasMoved\fP"
+.br
+.RI "Whether the piece has moved\&. "
+.ti -1c
+.RI "vector< string > \fBlegalMoves\fP"
+.br
+.RI "A list of legal moves\&. "
+.ti -1c
+.RI "const vector< unique_ptr< \fBPiece\fP > > * \fBpieces\fP"
+.br
+.ti -1c
+.RI "const \fBTurn\fP * \fBturn\fP"
+.br
+.RI "A pointer the color to play (from the \fBBoard\fP class)\&. "
+.ti -1c
+.RI "bool \fBisProtected\fP"
+.br
+.RI "Whether the pieces is protected by another piece\&. "
+.ti -1c
+.RI "const string \fBinitialPos\fP"
+.br
+.RI "Initial position of the piece\&. "
+.ti -1c
+.RI "string \fBattackingPositions\fP [2]"
+.br
+.RI "Position a piece can attack (used with Pawns only) "
+.ti -1c
+.RI "bool \fBenPassant\fP"
+.br
+.RI "Whether the can be enpassant-ed (used with Pawns only) "
+.ti -1c
+.RI "int \fBpawnMovementDirection\fP"
+.br
+.ti -1c
+.RI "unsigned \fBshortCastleRookIndex\fP { 65u }"
+.br
+.RI "Index of the kind side rook (from the vector of pieces), used with Kings only\&. "
+.ti -1c
+.RI "unsigned \fBlongCastleRookIndex\fP { 65u }"
+.br
+.RI "Index of the queen side rook (from the vector of pieces), used with Kings only\&. "
+.ti -1c
+.RI "bool \fBinCheck\fP"
+.br
+.RI "Whether the king is in check, used with Kings only\&. "
+.ti -1c
+.RI "bool \fBcanShortCastle\fP"
+.br
+.RI "Whether the king can castle king side, used with Kings only\&. "
+.ti -1c
+.RI "bool \fBcanLongCastle\fP"
+.br
+.RI "Whether the king can castle queen side, used with Kings only\&. "
+.in -1c
+.SS "Protected Member Functions"
+
+.in +1c
+.ti -1c
+.RI "virtual void \fBsetLegalMoves\fP ()"
+.br
+.RI "Calculates the legal moves\&. "
+.ti -1c
+.RI "void \fBremoveMovesOutsideBoard\fP ()"
+.br
+.RI "Removes moves outside board (ex: e9\&.\&.\&.)\&. "
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "Chess::Piece::Piece (const vector< unique_ptr< \fBPiece\fP > > * pieces, \fBTurn\fP * turn, const char type, const string & pos)"
+The constructor\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIpieces\fP a pointer to the vector of pieces (from the \fBBoard\fP class)\&. 
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBChess::Board\fP 
+.RE
+.PP
+\fBParameters\fP
+.RS 4
+\fIturn\fP a pointer to the turn class member of the containing \fBBoard\fP class\&. 
+.br
+\fIpos\fP the initial position of the piece\&. 
+.RE
+.PP
+
+.SS "Chess::Piece::Piece (const \fBPiece\fP & other)\fC [default]\fP"
+
+.SS "virtual Chess::Piece::~Piece ()\fC [inline]\fP, \fC [virtual]\fP"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "bool Chess::Piece::canPosBeAttacked (const string & pos, const \fBPieceColor\fP & color)"
+
+.PP
+Check whether a position can be attacked\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIpos\fP the position to be tested\&. 
+.br
+\fIthe\fP color of the piece to test relative to\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true is position can be attacked, false otherwise\&. 
+.RE
+.PP
+
+.SS "\fBPieceColor\fP Chess::Piece::isPosOccupied (const string & pos)"
+Check wether a position is occupied\&. 
+.PP
+\fBReturns\fP
+.RS 4
+PieceColor object, the color of the piece occupying the positon\&. 
+.PP
+PiecesColor::NONE if no pieces os at the given position\&. 
+.RE
+.PP
+
+.SS "bool Chess::Piece::isValidMove (const string & move)"
+
+.PP
+Checks wether a move is valid\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fImove\fP the position to check\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if the move is valid, false otherwise\&. 
+.RE
+.PP
+
+.SS "void Chess::Piece::longCastle ()\fC [virtual]\fP"
+
+.PP
+Handles queen side castling, Kings only\&. 
+.PP
+Reimplemented in \fBChess::King\fP\&.
+.SS "\fBPiece\fP Chess::Piece::operator= (const \fBPiece\fP & other)\fC [delete]\fP"
+
+.SS "void Chess::Piece::removeMovesOutsideBoard ()\fC [protected]\fP"
+
+.PP
+Removes moves outside board (ex: e9\&.\&.\&.)\&. 
+.SS "void Chess::Piece::reset ()"
+
+.PP
+Return to initial state (as if the piece was just created)\&. 
+.SS "void Chess::Piece::setLegalMoves ()\fC [protected]\fP, \fC [virtual]\fP"
+
+.PP
+Calculates the legal moves\&. 
+.PP
+Reimplemented in \fBChess::King\fP, \fBChess::Knight\fP, and \fBChess::Pawn\fP\&.
+.SS "void Chess::Piece::setRooksIndex ()\fC [virtual]\fP"
+
+.PP
+Save rooks indices, Kings only\&. 
+.PP
+Reimplemented in \fBChess::King\fP\&.
+.SS "void Chess::Piece::shortCastle ()\fC [virtual]\fP"
+
+.PP
+Handles king side castling, Kings only\&. 
+.PP
+Reimplemented in \fBChess::King\fP\&.
+.SS "void Chess::Piece::update ()\fC [virtual]\fP"
+
+.PP
+Overridden for '\fBPawn\fP'\&. 
+.PP
+Reimplemented in \fBChess::Pawn\fP\&.
+.SH "Member Data Documentation"
+.PP 
+.SS "bool Chess::Piece::alive"
+
+.PP
+Whether the piece on the board\&. 
+.SS "string Chess::Piece::attackingPositions[2]"
+
+.PP
+Position a piece can attack (used with Pawns only) 
+.SS "bool Chess::Piece::canLongCastle"
+
+.PP
+Whether the king can castle queen side, used with Kings only\&. 
+.SS "bool Chess::Piece::canShortCastle"
+
+.PP
+Whether the king can castle king side, used with Kings only\&. 
+.SS "\fBPieceColor\fP Chess::Piece::color"
+
+.PP
+Color of the piece\&. 
+.SS "bool Chess::Piece::enPassant"
+
+.PP
+Whether the can be enpassant-ed (used with Pawns only) 
+.SS "bool Chess::Piece::hasMoved"
+
+.PP
+Whether the piece has moved\&. 
+.SS "bool Chess::Piece::inCheck"
+
+.PP
+Whether the king is in check, used with Kings only\&. 
+.SS "const string Chess::Piece::initialPos"
+
+.PP
+Initial position of the piece\&. 
+.SS "bool Chess::Piece::isProtected"
+
+.PP
+Whether the pieces is protected by another piece\&. 
+.SS "vector<string> Chess::Piece::legalMoves"
+
+.PP
+A list of legal moves\&. 
+.SS "unsigned Chess::Piece::longCastleRookIndex { 65u }"
+
+.PP
+Index of the queen side rook (from the vector of pieces), used with Kings only\&. 
+.SS "int Chess::Piece::pawnMovementDirection"
+Movement direction of the piece (used with Pawns only)\&. 1 for white and -1 for black\&. 
+.SS "const vector< unique_ptr<\fBPiece\fP> >* Chess::Piece::pieces"
+A pointer to the list of pieces (from the \fBBoard\fP class)\&. 
+.SS "string Chess::Piece::pos"
+
+.PP
+Position of the piece\&. 
+.SS "unsigned Chess::Piece::shortCastleRookIndex { 65u }"
+
+.PP
+Index of the kind side rook (from the vector of pieces), used with Kings only\&. 
+.SS "const \fBTurn\fP* Chess::Piece::turn"
+
+.PP
+A pointer the color to play (from the \fBBoard\fP class)\&. 
+.SS "const char Chess::Piece::type"
+
+.PP
+Type of the piece\&. 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Chess Engine from the source code\&.

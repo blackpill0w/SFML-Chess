@@ -1,0 +1,84 @@
+.TH "Chess::King" 3 "Sun Sep 11 2022" "Chess Engine" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Chess::King
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <king\&.hpp>\fP
+.PP
+Inherits \fBChess::Piece\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBKing\fP (const vector< unique_ptr< \fBPiece\fP > > *\fBpieces\fP, \fBTurn\fP *\fBturn\fP, const char \fBtype\fP, const string &\fBpos\fP)"
+.br
+.ti -1c
+.RI "void \fBsetLegalMoves\fP () override"
+.br
+.RI "Calculates the legal moves\&. "
+.ti -1c
+.RI "void \fBsetRooksIndex\fP () override"
+.br
+.RI "Save rooks indices, Kings only\&. "
+.ti -1c
+.RI "void \fBshortCastle\fP () override"
+.br
+.RI "Handles king side castling, Kings only\&. "
+.ti -1c
+.RI "void \fBlongCastle\fP () override"
+.br
+.RI "Handles queen side castling, Kings only\&. "
+.in -1c
+.SS "Protected Member Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBcheckCastle\fP ()"
+.br
+.ti -1c
+.RI "void \fBisPieceProtected\fP ()"
+.br
+.in -1c
+.SS "Additional Inherited Members"
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "Chess::King::King (const vector< unique_ptr< \fBPiece\fP > > * pieces, \fBTurn\fP * turn, const char type, const string & pos)"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "void Chess::King::checkCastle ()\fC [protected]\fP"
+
+.SS "void Chess::King::isPieceProtected ()\fC [protected]\fP"
+
+.SS "void Chess::King::longCastle ()\fC [override]\fP, \fC [virtual]\fP"
+
+.PP
+Handles queen side castling, Kings only\&. 
+.PP
+Reimplemented from \fBChess::Piece\fP\&.
+.SS "void Chess::King::setLegalMoves ()\fC [override]\fP, \fC [virtual]\fP"
+
+.PP
+Calculates the legal moves\&. 
+.PP
+Reimplemented from \fBChess::Piece\fP\&.
+.SS "void Chess::King::setRooksIndex ()\fC [override]\fP, \fC [virtual]\fP"
+
+.PP
+Save rooks indices, Kings only\&. 
+.PP
+Reimplemented from \fBChess::Piece\fP\&.
+.SS "void Chess::King::shortCastle ()\fC [override]\fP, \fC [virtual]\fP"
+
+.PP
+Handles king side castling, Kings only\&. 
+.PP
+Reimplemented from \fBChess::Piece\fP\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Chess Engine from the source code\&.

@@ -1,0 +1,40 @@
+.TH "Chess::Knight" 3 "Sun Sep 11 2022" "Chess Engine" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Chess::Knight
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <knight\&.hpp>\fP
+.PP
+Inherits \fBChess::Piece\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBKnight\fP (const vector< unique_ptr< \fBPiece\fP > > *\fBpieces\fP, \fBTurn\fP *\fBturn\fP, const char \fBtype\fP, const string &\fBpos\fP)"
+.br
+.ti -1c
+.RI "void \fBsetLegalMoves\fP () override"
+.br
+.RI "Calculates the legal moves\&. "
+.in -1c
+.SS "Additional Inherited Members"
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "Chess::Knight::Knight (const vector< unique_ptr< \fBPiece\fP > > * pieces, \fBTurn\fP * turn, const char type, const string & pos)"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "void Chess::Knight::setLegalMoves ()\fC [override]\fP, \fC [virtual]\fP"
+
+.PP
+Calculates the legal moves\&. 
+.PP
+Reimplemented from \fBChess::Piece\fP\&.
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Chess Engine from the source code\&.

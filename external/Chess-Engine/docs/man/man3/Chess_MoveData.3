@@ -1,0 +1,79 @@
+.TH "Chess::MoveData" 3 "Sun Sep 11 2022" "Chess Engine" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Chess::MoveData
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <board\&.hpp>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBoperator==\fP (const \fBMoveData\fP &other) const"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "string \fBoldPos\fP {}"
+.br
+.ti -1c
+.RI "string \fBnewPos\fP {}"
+.br
+.ti -1c
+.RI "unsigned \fBmovingPieceIndex\fP { 65u }"
+.br
+.ti -1c
+.RI "unsigned \fBtakenPieceIndex\fP { 65u }"
+.br
+.ti -1c
+.RI "bool \fBisMoveEnPassant\fP { false }"
+.br
+.ti -1c
+.RI "bool \fBisMoveCastle\fP { false }"
+.br
+.ti -1c
+.RI "bool \fBpieceHasMovedChanged\fP { false }"
+.br
+.ti -1c
+.RI "bool \fBisPromotion\fP { false }"
+.br
+.ti -1c
+.RI "unsigned \fBpreviousFiftyMoveRule\fP { 0 }"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+TODO A class to store a move's data\&. 
+.SH "Member Function Documentation"
+.PP 
+.SS "bool Chess::MoveData::operator== (const \fBMoveData\fP & other) const\fC [inline]\fP"
+
+.SH "Member Data Documentation"
+.PP 
+.SS "bool Chess::MoveData::isMoveCastle { false }"
+
+.SS "bool Chess::MoveData::isMoveEnPassant { false }"
+
+.SS "bool Chess::MoveData::isPromotion { false }"
+
+.SS "unsigned Chess::MoveData::movingPieceIndex { 65u }"
+
+.SS "string Chess::MoveData::newPos {}"
+
+.SS "string Chess::MoveData::oldPos {}"
+
+.SS "bool Chess::MoveData::pieceHasMovedChanged { false }"
+
+.SS "unsigned Chess::MoveData::previousFiftyMoveRule { 0 }"
+
+.SS "unsigned Chess::MoveData::takenPieceIndex { 65u }"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Chess Engine from the source code\&.

@@ -1,0 +1,69 @@
+.TH "Chess::Pawn" 3 "Sun Sep 11 2022" "Chess Engine" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Chess::Pawn
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <pawn\&.hpp>\fP
+.PP
+Inherits \fBChess::Piece\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBPawn\fP (const vector< unique_ptr< \fBPiece\fP > > *\fBpieces\fP, \fBTurn\fP *\fBturn\fP, const char \fBtype\fP, const string &\fBpos\fP)"
+.br
+.ti -1c
+.RI "void \fBsetLegalMoves\fP () override"
+.br
+.RI "Calculates the legal moves\&. "
+.ti -1c
+.RI "void \fBupdate\fP () override"
+.br
+.RI "Overridden for '\fBPawn\fP'\&. "
+.in -1c
+.SS "Protected Member Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBupdateAttackingPositions\fP ()"
+.br
+.ti -1c
+.RI "void \fBcheckEnPassant\fP ()"
+.br
+.ti -1c
+.RI "bool \fBisEnPassantResultsInCheck\fP ()"
+.br
+.in -1c
+.SS "Additional Inherited Members"
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "Chess::Pawn::Pawn (const vector< unique_ptr< \fBPiece\fP > > * pieces, \fBTurn\fP * turn, const char type, const string & pos)"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "void Chess::Pawn::checkEnPassant ()\fC [protected]\fP"
+
+.SS "bool Chess::Pawn::isEnPassantResultsInCheck ()\fC [protected]\fP"
+
+.SS "void Chess::Pawn::setLegalMoves ()\fC [override]\fP, \fC [virtual]\fP"
+
+.PP
+Calculates the legal moves\&. 
+.PP
+Reimplemented from \fBChess::Piece\fP\&.
+.SS "void Chess::Pawn::update ()\fC [override]\fP, \fC [virtual]\fP"
+
+.PP
+Overridden for '\fBPawn\fP'\&. 
+.PP
+Reimplemented from \fBChess::Piece\fP\&.
+.SS "void Chess::Pawn::updateAttackingPositions ()\fC [protected]\fP"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Chess Engine from the source code\&.

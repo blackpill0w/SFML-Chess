@@ -1,0 +1,372 @@
+.TH "Chess::Board" 3 "Sun Sep 11 2022" "Chess Engine" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Chess::Board
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <board\&.hpp>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBBoard\fP (const string &fenStr='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq \- 0 1')"
+.br
+.ti -1c
+.RI "void \fBloadFEN\fP (const string &fenStr)"
+.br
+.ti -1c
+.RI "void \fBloadPieces\fP (const string &FENpiecesStr)"
+.br
+.ti -1c
+.RI "void \fBsetCastlingRights\fP (const string &FENcastlingRights)"
+.br
+.ti -1c
+.RI "void \fBsetEnpassantTargetSquare\fP (const string &FENenpassantSquare)"
+.br
+.ti -1c
+.RI "void \fBmove\fP (const string &from, const string &to, const char pieceToPromoteTo=0)"
+.br
+.RI "Move a piece\&. "
+.ti -1c
+.RI "unsigned \fBgetIndexOfPieceAt\fP (const string &pos, const \fBPieceColor\fP &colorToBeDifferentFrom=\fBNONE\fP, const bool &aliveState=true)"
+.br
+.RI "Get index (in the vector of pieces) of a piece\&. "
+.ti -1c
+.RI "void \fBupdate\fP ()"
+.br
+.RI "Update the state of the board\&. "
+.ti -1c
+.RI "void \fBundoLastMove\fP ()"
+.br
+.RI "Undo the last move\&. "
+.ti -1c
+.RI "unsigned \fBgetNumberOfPossibleMoves\fP ()"
+.br
+.RI "Get the number of possible moves\&. "
+.ti -1c
+.RI "void \fBreset\fP ()"
+.br
+.RI "Put board in initial state (last FEN string passed)\&. "
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "vector< unique_ptr< \fBPiece\fP > > \fBpieces\fP"
+.br
+.RI "The representation of the board\&. "
+.ti -1c
+.RI "\fBTurn\fP \fBturn\fP"
+.br
+.RI "Color of the pieces to play\&. "
+.ti -1c
+.RI "\fBGameState\fP \fBgameState\fP"
+.br
+.RI "Game's state\&. "
+.in -1c
+.SS "Protected Member Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBchangeTurn\fP ()"
+.br
+.RI "Change the turn\&. "
+.ti -1c
+.RI "void \fBremovePiece\fP (const unsigned &index)"
+.br
+.RI "Remove a piece from the board\&. "
+.ti -1c
+.RI "bool \fBisMoveCastle\fP (const unsigned &movingPieceIndex, const string &from, const string &to)"
+.br
+.RI "Check if the move made was castle\&. "
+.ti -1c
+.RI "void \fBhandleCastling\fP (const unsigned &movingPieceIndex, const string &from, const string &to)"
+.br
+.RI "Handle castling\&. "
+.ti -1c
+.RI "void \fBcheckEnableEnPassant\fP (const unsigned &movingPieceIndex, const string &from, const string &to)"
+.br
+.RI "Check if a pawn can be en-passant-ed\&. "
+.ti -1c
+.RI "unsigned \fBcheckIfMoveWasEnPassant\fP (const unsigned &movingPieceIndex, const string &from, const string &to)"
+.br
+.RI "Check if the move made was en passant\&. "
+.ti -1c
+.RI "void \fBcheckTaking\fP (const unsigned &movingPieceIndex, const string &from, const string &to, \fBMoveData\fP &\fBmove\fP)"
+.br
+.RI "Check if the move made was a capture\&. "
+.ti -1c
+.RI "void \fBcheckDisableEnPassant\fP ()"
+.br
+.ti -1c
+.RI "void \fBcheckPromoting\fP (const unsigned &movingPieceIndex, const char pieceToPromoteTo, \fBMoveData\fP &\fBmove\fP)"
+.br
+.RI "Check if the move made was a pawn promotion\&. "
+.ti -1c
+.RI "vector< string > \fBgetAllSquaresInBetween\fP (string &from, string &to, const int direction[2])"
+.br
+.ti -1c
+.RI "void \fBremoveMovesIfNotInVector\fP (const unsigned &pieceIndex, const vector< string > &moves)"
+.br
+.ti -1c
+.RI "void \fBhandlePins\fP ()"
+.br
+.RI "Handle pins\&. "
+.ti -1c
+.RI "void \fBhandleChecks\fP ()"
+.br
+.RI "Handle checks\&. "
+.ti -1c
+.RI "void \fBhandleSlidingPiecesChecks\fP ()"
+.br
+.ti -1c
+.RI "void \fBhandlePawnKnightCheck\fP ()"
+.br
+.RI "Handle checks of pawns and knights\&. "
+.ti -1c
+.RI "void \fBcalculatePossibleMoves\fP ()"
+.br
+.RI "Calculate the number of possible moves\&. "
+.ti -1c
+.RI "bool \fBisDrawByRepitition\fP ()"
+.br
+.RI "Checks for draw by repitition\&. "
+.ti -1c
+.RI "void \fBcheckGameEnd\fP ()"
+.br
+.RI "Checks if there is a checkmate or a draw\&. "
+.in -1c
+.SS "Protected Attributes"
+
+.in +1c
+.ti -1c
+.RI "unsigned \fBwKingIndex\fP"
+.br
+.RI "Indices of the kings\&. "
+.ti -1c
+.RI "unsigned \fBbKingIndex\fP"
+.br
+.ti -1c
+.RI "vector< \fBMoveData\fP > \fBmoveList\fP"
+.br
+.ti -1c
+.RI "unsigned \fBpossibleMoves\fP"
+.br
+.RI "The number of possible moves\&. "
+.ti -1c
+.RI "unsigned \fBinitialPiecesNum\fP"
+.br
+.RI "Number of pieces at the beginning of the game\&. "
+.ti -1c
+.RI "unsigned \fBfiftyMoveRuleCounter\fP"
+.br
+.RI "Counter for the fifty move rule\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+A class to handle the game's logic, the representation of the board is a vector of unique_ptr of the '\fBPiece\fP' class\&. 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "Chess::Board::Board (const string & fenStr = \fC'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq \- 0 1'\fP)"
+The constructor, takes an optional parameter to load an FEN string\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIfenStr\fP the FEN string, initial state of the board\&. 
+.RE
+.PP
+
+.SH "Member Function Documentation"
+.PP 
+.SS "void Chess::Board::calculatePossibleMoves ()\fC [protected]\fP"
+
+.PP
+Calculate the number of possible moves\&. 
+.SS "void Chess::Board::changeTurn ()\fC [protected]\fP"
+
+.PP
+Change the turn\&. 
+.SS "void Chess::Board::checkDisableEnPassant ()\fC [protected]\fP"
+Check if en passant was legal for some pawn and make it illegal\&. 
+.SS "void Chess::Board::checkEnableEnPassant (const unsigned & movingPieceIndex, const string & from, const string & to)\fC [protected]\fP"
+
+.PP
+Check if a pawn can be en-passant-ed\&. 
+.SS "void Chess::Board::checkGameEnd ()\fC [protected]\fP"
+
+.PP
+Checks if there is a checkmate or a draw\&. 
+.SS "unsigned Chess::Board::checkIfMoveWasEnPassant (const unsigned & movingPieceIndex, const string & from, const string & to)\fC [protected]\fP"
+
+.PP
+Check if the move made was en passant\&. 
+.SS "void Chess::Board::checkPromoting (const unsigned & movingPieceIndex, const char pieceToPromoteTo, \fBMoveData\fP & move)\fC [protected]\fP"
+
+.PP
+Check if the move made was a pawn promotion\&. 
+.SS "void Chess::Board::checkTaking (const unsigned & movingPieceIndex, const string & from, const string & to, \fBMoveData\fP & move)\fC [protected]\fP"
+
+.PP
+Check if the move made was a capture\&. 
+.SS "vector< string > Chess::Board::getAllSquaresInBetween (string & from, string & to, const int direction[2])\fC [protected]\fP"
+Gives all the squares between two positions (inclusif) moving in a given direction\&. 
+.SS "unsigned Chess::Board::getIndexOfPieceAt (const string & pos, const \fBPieceColor\fP & colorToBeDifferentFrom = \fC\fBNONE\fP\fP, const bool & aliveState = \fCtrue\fP)"
+
+.PP
+Get index (in the vector of pieces) of a piece\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIpos\fP position of the piece 
+.br
+\fIcolorToBeDifferentFrom\fP (optional) the color of the enemy's pieces\&. 
+.br
+\fIalivestate\fP (optional) whether the piece is on the board (if a piece is taken it stays in the vector, but in a dead state)\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+index of the piece if it was found, otherwise 65\&. 
+.RE
+.PP
+
+.SS "unsigned Chess::Board::getNumberOfPossibleMoves ()"
+
+.PP
+Get the number of possible moves\&. 
+.SS "void Chess::Board::handleCastling (const unsigned & movingPieceIndex, const string & from, const string & to)\fC [protected]\fP"
+
+.PP
+Handle castling\&. 
+.SS "void Chess::Board::handleChecks ()\fC [protected]\fP"
+
+.PP
+Handle checks\&. 
+.SS "void Chess::Board::handlePawnKnightCheck ()\fC [protected]\fP"
+
+.PP
+Handle checks of pawns and knights\&. 
+.SS "void Chess::Board::handlePins ()\fC [protected]\fP"
+
+.PP
+Handle pins\&. 
+.SS "void Chess::Board::handleSlidingPiecesChecks ()\fC [protected]\fP"
+Handle checks of sliding pieces (queens, rooks and bishops)\&. 
+.SS "bool Chess::Board::isDrawByRepitition ()\fC [protected]\fP"
+
+.PP
+Checks for draw by repitition\&. 
+.SS "bool Chess::Board::isMoveCastle (const unsigned & movingPieceIndex, const string & from, const string & to)\fC [protected]\fP"
+
+.PP
+Check if the move made was castle\&. 
+.SS "void Chess::Board::loadFEN (const string & fenStr)"
+Functions to load an FEN string\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIfenStr\fP the FEN string\&. 
+.RE
+.PP
+
+.SS "void Chess::Board::loadPieces (const string & FENpiecesStr)"
+Load the pieces from an FEN string\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIFENpiecesStr\fP positions of the pieces from FEN string\&. 
+.RE
+.PP
+
+.SS "void Chess::Board::move (const string & from, const string & to, const char pieceToPromoteTo = \fC0\fP)"
+
+.PP
+Move a piece\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIfrom\fP position of the piece to move\&. 
+.br
+\fIto\fP position to move the piece to 
+.br
+\fIpieceToPromoteto\fP piece to promote to if the move is a promotion, optional if the move is not a promotion\&. 
+.RE
+.PP
+
+.SS "void Chess::Board::removeMovesIfNotInVector (const unsigned & pieceIndex, const vector< string > & moves)\fC [protected]\fP"
+Given a vector of positions and an index of a piece, every piece's possible move that is not in that vector is removed\&. 
+.SS "void Chess::Board::removePiece (const unsigned & index)\fC [protected]\fP"
+
+.PP
+Remove a piece from the board\&. 
+.SS "void Chess::Board::reset ()"
+
+.PP
+Put board in initial state (last FEN string passed)\&. 
+.SS "void Chess::Board::setCastlingRights (const string & FENcastlingRights)"
+Set castling rights from an FEN string\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIFENcastlingRights\fP castling rights from an FEN string\&. 
+.RE
+.PP
+
+.SS "void Chess::Board::setEnpassantTargetSquare (const string & FENenpassantSquare)"
+Set enpassant from an FEN string\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIFENenpassantSquare\fP enpassant square from an FEN string\&. 
+.RE
+.PP
+
+.SS "void Chess::Board::undoLastMove ()"
+
+.PP
+Undo the last move\&. 
+.SS "void Chess::Board::update ()"
+
+.PP
+Update the state of the board\&. 
+.SH "Member Data Documentation"
+.PP 
+.SS "unsigned Chess::Board::bKingIndex\fC [protected]\fP"
+
+.SS "unsigned Chess::Board::fiftyMoveRuleCounter\fC [protected]\fP"
+
+.PP
+Counter for the fifty move rule\&. 
+.SS "\fBGameState\fP Chess::Board::gameState"
+
+.PP
+Game's state\&. 
+.SS "unsigned Chess::Board::initialPiecesNum\fC [protected]\fP"
+
+.PP
+Number of pieces at the beginning of the game\&. 
+.SS "vector< \fBMoveData\fP > Chess::Board::moveList\fC [protected]\fP"
+It is used to save data about moves in order to implement the undo functionality\&. 
+.SS "vector< unique_ptr<\fBPiece\fP> > Chess::Board::pieces"
+
+.PP
+The representation of the board\&. 
+.SS "unsigned Chess::Board::possibleMoves\fC [protected]\fP"
+
+.PP
+The number of possible moves\&. 
+.SS "\fBTurn\fP Chess::Board::turn"
+
+.PP
+Color of the pieces to play\&. 
+.SS "unsigned Chess::Board::wKingIndex\fC [protected]\fP"
+
+.PP
+Indices of the kings\&. 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Chess Engine from the source code\&.
