@@ -1,6 +1,9 @@
 # SFML-Chess
 Chess in SFML v2.5.1 (C++14)
 
+# Note
+This was rewritten, this engine is slow and contains bugs, use [this engine](https://github.com/blackpill0w/Chess-Engine) instead.
+
 # Dependencies
 - SFML v2.5.1
 
